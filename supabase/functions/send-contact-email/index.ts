@@ -127,12 +127,25 @@ Deno.serve(async (req: Request) => {
 
   try {
     const resendApiKey = Deno.env.get("RESEND_API_KEY");
+    const contactData: ContactData = await req.json();
 
     if (!resendApiKey) {
-      throw new Error("RESEND_API_KEY is not configured");
+      console.log("RESEND_API_KEY not configured - email notification skipped");
+      return new Response(
+        JSON.stringify({
+          success: true,
+          emailSent: false,
+          message: "Form submitted successfully. Email notifications not configured.",
+        }),
+        {
+          headers: {
+            ...corsHeaders,
+            "Content-Type": "application/json",
+          },
+          status: 200,
+        }
+      );
     }
-
-    const contactData: ContactData = await req.json();
 
     const htmlContent = generateHTMLEmail(contactData);
     const textContent = generatePlainTextEmail(contactData);
@@ -166,6 +179,7 @@ Deno.serve(async (req: Request) => {
     return new Response(
       JSON.stringify({
         success: true,
+        emailSent: true,
         messageId: result.id,
       }),
       {
