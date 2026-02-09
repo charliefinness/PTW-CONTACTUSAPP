@@ -81,16 +81,41 @@ export default function ContactForm() {
     }
 
     try {
-      const { error } = await supabase.from('contacts').insert([
-        {
-          ...formData,
-          phone: formData.phone || null,
-          message: formData.message || null,
-          interests: selectedInterests,
-        },
-      ]);
+      const contactData = {
+        ...formData,
+        phone: formData.phone || null,
+        message: formData.message || null,
+        interests: selectedInterests,
+      };
+
+      const { error } = await supabase.from('contacts').insert([contactData]);
 
       if (error) throw error;
+
+      try {
+        const apiUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send-contact-email`;
+        const emailResponse = await fetch(apiUrl, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            first_name: formData.first_name,
+            last_name: formData.last_name,
+            email: formData.email,
+            phone: formData.phone || undefined,
+            interests: selectedInterests,
+            message: formData.message || undefined,
+          }),
+        });
+
+        if (!emailResponse.ok) {
+          console.error('Failed to send email notification');
+        }
+      } catch (emailError) {
+        console.error('Error sending email notification:', emailError);
+      }
 
       setSubmitStatus('success');
       setFormData({
