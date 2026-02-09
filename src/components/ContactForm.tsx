@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { supabase } from '../lib/supabase';
-import { Heart, ChevronDown, ChevronUp } from 'lucide-react';
+import { ChevronDown, ChevronUp } from 'lucide-react';
 
 type ServiceCategory = {
   name: string;
@@ -194,18 +194,22 @@ export default function ContactForm() {
   return (
     <div className="w-full max-w-3xl mx-auto p-8 bg-white rounded-2xl shadow-xl">
       <div className="text-center mb-8">
-        <div className="flex items-center justify-center gap-2 mb-3">
-          <Heart className="w-8 h-8 text-emerald-600" />
-          <h2 className="text-3xl font-bold text-gray-900">Get in Touch</h2>
-        </div>
-        <p className="text-gray-600">
-          We're here to help with reentry services and support
+        <img
+          src="/ptw_logo.png"
+          alt="Paving the Way Foundation"
+          className="w-32 h-32 mx-auto mb-4"
+        />
+        <h2 className="text-4xl font-bold mb-2 bg-gradient-to-r from-yellow-500 via-orange-500 to-green-600 bg-clip-text text-transparent">
+          Contact US
+        </h2>
+        <p className="text-gray-700 text-lg">
+          We're here to help pave your way forward
         </p>
       </div>
 
       {submitStatus === 'success' && (
-        <div className="mb-6 p-4 bg-emerald-50 border border-emerald-200 rounded-lg">
-          <p className="text-emerald-800 font-medium">
+        <div className="mb-6 p-4 bg-gradient-to-r from-yellow-50 via-orange-50 to-green-50 border-2 border-orange-300 rounded-lg">
+          <p className="text-orange-800 font-medium">
             Thank you for reaching out! We'll get back to you soon.
           </p>
         </div>
@@ -232,7 +236,7 @@ export default function ContactForm() {
               required
               value={formData.first_name}
               onChange={handleChange}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-400 focus:border-orange-400 transition-colors"
               placeholder="John"
             />
           </div>
@@ -248,7 +252,7 @@ export default function ContactForm() {
               required
               value={formData.last_name}
               onChange={handleChange}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-400 focus:border-orange-400 transition-colors"
               placeholder="Smith"
             />
           </div>
@@ -291,7 +295,7 @@ export default function ContactForm() {
               What Services Are You Looking For? *
             </label>
             {selectedInterests.length > 0 && (
-              <span className="text-sm text-emerald-600 font-medium">
+              <span className="text-sm text-orange-600 font-medium">
                 {selectedInterests.length} selected
               </span>
             )}
@@ -325,7 +329,7 @@ export default function ContactForm() {
                         )}
                         <span className="font-semibold text-gray-900">{category.name}</span>
                         {!isExpanded && isPartiallySelected && (
-                          <span className="text-xs text-emerald-600">
+                          <span className="text-xs text-orange-600">
                             ({category.services.filter((s) => selectedInterests.includes(s)).length}/
                             {category.services.length})
                           </span>
@@ -336,9 +340,9 @@ export default function ContactForm() {
                         onClick={() => toggleCategoryAll(category)}
                         className={`px-3 py-1 text-xs font-medium rounded transition-colors ${
                           isFullySelected
-                            ? 'bg-emerald-600 text-white hover:bg-emerald-700'
+                            ? 'bg-gradient-to-r from-orange-500 to-orange-600 text-white hover:from-orange-600 hover:to-orange-700'
                             : isPartiallySelected
-                            ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200'
+                            ? 'bg-orange-100 text-orange-700 hover:bg-orange-200'
                             : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                         }`}
                       >
@@ -358,7 +362,7 @@ export default function ContactForm() {
                             type="checkbox"
                             checked={selectedInterests.includes(service)}
                             onChange={() => toggleService(service)}
-                            className="w-4 h-4 text-emerald-600 border-gray-300 rounded focus:ring-emerald-500"
+                            className="w-4 h-4 text-orange-500 border-gray-300 rounded focus:ring-orange-400"
                           />
                           <span className="text-sm text-gray-700">{service}</span>
                         </label>
@@ -389,7 +393,7 @@ export default function ContactForm() {
         <button
           type="submit"
           disabled={isSubmitting}
-          className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-4 px-6 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl"
+          className="w-full bg-gradient-to-r from-yellow-500 via-orange-500 to-orange-600 hover:from-yellow-600 hover:via-orange-600 hover:to-orange-700 text-white font-bold py-4 px-6 rounded-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl transform hover:scale-[1.02]"
         >
           {isSubmitting ? 'Sending...' : 'Submit'}
         </button>
