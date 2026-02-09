@@ -151,9 +151,9 @@ Deno.serve(async (req: Request) => {
     const textContent = generatePlainTextEmail(contactData);
 
     const emailPayload = {
-      from: `${contactData.first_name} ${contactData.last_name} <${contactData.email}>`,
+      from: "Paving The Way <noreply@helixitcs.com>",
       to: ["support@helixitcs.com"],
-      subject: "INTRESTED IN SUPPORT SERVICES",
+      subject: `New Support Services Request from ${contactData.first_name} ${contactData.last_name}`,
       html: htmlContent,
       text: textContent,
       reply_to: contactData.email,
