@@ -152,7 +152,7 @@ Deno.serve(async (req: Request) => {
 
     const emailPayload = {
       from: `${contactData.first_name} ${contactData.last_name} <${contactData.email}>`,
-      to: ["intake@pavingthewayfd.com"],
+      to: ["support@helixitcs.com"],
       subject: "INTRESTED IN SUPPORT SERVICES",
       html: htmlContent,
       text: textContent,
