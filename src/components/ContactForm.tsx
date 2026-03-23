@@ -61,6 +61,7 @@ export default function ContactForm() {
     email: '',
     phone: '',
     message: '',
+    honeypot: '',
   });
   const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
   const [expandedCategories, setExpandedCategories] = useState<string[]>([]);
@@ -82,7 +83,9 @@ export default function ContactForm() {
 
     try {
       const contactData = {
-        ...formData,
+        first_name: formData.first_name,
+        last_name: formData.last_name,
+        email: formData.email,
         phone: formData.phone || null,
         message: formData.message || null,
         interests: selectedInterests,
@@ -107,10 +110,24 @@ export default function ContactForm() {
             phone: formData.phone || undefined,
             interests: selectedInterests,
             message: formData.message || undefined,
+            honeypot: formData.honeypot || undefined,
           }),
         });
 
+        const emailResult = await emailResponse.json();
+
         if (!emailResponse.ok) {
+          if (emailResponse.status === 429) {
+            setValidationError('Too many submissions. Please try again in a moment.');
+            setSubmitStatus('error');
+            setIsSubmitting(false);
+            return;
+          } else if (emailResponse.status === 400) {
+            setValidationError(emailResult.error || 'Invalid submission');
+            setSubmitStatus('error');
+            setIsSubmitting(false);
+            return;
+          }
           console.error('Failed to send email notification');
         }
       } catch (emailError) {
@@ -124,6 +141,7 @@ export default function ContactForm() {
         email: '',
         phone: '',
         message: '',
+        honeypot: '',
       });
       setSelectedInterests([]);
       setExpandedCategories([]);
@@ -388,6 +406,23 @@ export default function ContactForm() {
             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors resize-none"
             placeholder="Tell us more about how we can help..."
           />
+        </div>
+
+        <input
+          type="text"
+          name="honeypot"
+          value={formData.honeypot}
+          onChange={handleChange}
+          autoComplete="off"
+          tabIndex={-1}
+          aria-hidden="true"
+          className="absolute -left-[9999px] w-0 h-0 opacity-0"
+        />
+
+        <div className="text-sm text-gray-600 bg-gray-50 p-4 rounded-lg border border-gray-200">
+          <p>
+            By submitting this form, you agree to our collection and use of your personal information as described in our privacy policy. We will only use your information to respond to your inquiry and provide the services you requested.
+          </p>
         </div>
 
         <button
