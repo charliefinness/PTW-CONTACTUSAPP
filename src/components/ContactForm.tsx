@@ -95,43 +95,44 @@ export default function ContactForm() {
 
       if (error) throw error;
 
-      try {
-        const apiUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send-contact-email`;
-        const emailResponse = await fetch(apiUrl, {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            first_name: formData.first_name,
-            last_name: formData.last_name,
-            email: formData.email,
-            phone: formData.phone || undefined,
-            interests: selectedInterests,
-            message: formData.message || undefined,
-            honeypot: formData.honeypot || undefined,
-          }),
-        });
+      const apiUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send-contact-email`;
+      const emailResponse = await fetch(apiUrl, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          first_name: formData.first_name,
+          last_name: formData.last_name,
+          email: formData.email,
+          phone: formData.phone || undefined,
+          interests: selectedInterests,
+          message: formData.message || undefined,
+          honeypot: formData.honeypot || undefined,
+        }),
+      });
 
-        const emailResult = await emailResponse.json();
-
-        if (!emailResponse.ok) {
-          if (emailResponse.status === 429) {
-            setValidationError('Too many submissions. Please try again in a moment.');
-            setSubmitStatus('error');
-            setIsSubmitting(false);
-            return;
-          } else if (emailResponse.status === 400) {
-            setValidationError(emailResult.error || 'Invalid submission');
-            setSubmitStatus('error');
-            setIsSubmitting(false);
-            return;
-          }
-          console.error('Failed to send email notification');
+      if (!emailResponse.ok) {
+        let emailResult;
+        try {
+          emailResult = await emailResponse.json();
+        } catch {
+          emailResult = { error: 'Unknown error' };
         }
-      } catch (emailError) {
-        console.error('Error sending email notification:', emailError);
+
+        if (emailResponse.status === 429) {
+          setValidationError('Too many submissions. Please try again in a moment.');
+          setSubmitStatus('error');
+          setIsSubmitting(false);
+          return;
+        } else if (emailResponse.status === 400) {
+          setValidationError(emailResult.error || 'Invalid submission');
+          setSubmitStatus('error');
+          setIsSubmitting(false);
+          return;
+        }
+        console.error('Failed to send email notification:', emailResult);
       }
 
       setSubmitStatus('success');
@@ -148,6 +149,11 @@ export default function ContactForm() {
     } catch (error) {
       console.error('Error submitting form:', error);
       setSubmitStatus('error');
+      if (error instanceof Error) {
+        setValidationError(error.message);
+      } else {
+        setValidationError('An unexpected error occurred. Please try again.');
+      }
     } finally {
       setIsSubmitting(false);
     }
