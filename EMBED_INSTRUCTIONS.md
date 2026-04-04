@@ -1,72 +1,85 @@
-# Embedding the Contact Form on pavingthewayfd.com
+# Embedding the Contact Form in Canva Website
 
-## Option 1: iframe Embedding (Recommended)
+## How It Works
 
-Add this code to your `/contact-us` page:
+This contact form sends submissions directly via email without storing any data in a database. When someone submits the form, it:
+1. Validates the input
+2. Sends an email notification to **support@pavingthewayfd.org**
+3. Shows a success message to the user
+
+## Embedding in Canva
+
+### Step 1: Deploy Your Form
+
+First, make sure your form is deployed and accessible at a public URL. You'll need this URL for embedding.
+
+### Step 2: Add to Canva Website
+
+1. In your Canva website editor, go to the page where you want to add the contact form
+2. Click on "Apps" or "Elements" in the left sidebar
+3. Search for "Embed" or "HTML embed"
+4. Add the embed element to your page
+5. Use this embed code:
 
 ```html
 <iframe
   src="https://[YOUR-DEPLOYMENT-URL]/"
   width="100%"
-  height="1200px"
+  height="1200"
   frameborder="0"
   style="border: none; max-width: 900px; margin: 0 auto; display: block;"
-  title="Paving The Way Contact Form"
+  title="Contact Form"
 ></iframe>
 ```
 
-Replace `[YOUR-DEPLOYMENT-URL]` with your deployed application URL.
+Replace `[YOUR-DEPLOYMENT-URL]` with your actual deployed application URL.
 
-## Option 2: Direct Integration (React)
+### Step 3: Adjust Height (Optional)
 
-If your website is built with React, you can import the component directly:
+If the form appears cut off or has too much white space:
+- Adjust the `height="1200"` value in the iframe code
+- Recommended heights:
+  - Desktop: 1200px
+  - Tablet: 1300px
+  - Mobile: 1400px
 
-1. Copy the following files to your project:
-   - `src/components/ContactForm.tsx`
-   - `src/lib/supabase.ts`
+## Alternative: Direct Link
 
-2. Install dependencies:
-   ```bash
-   npm install @supabase/supabase-js lucide-react
-   ```
+If Canva doesn't support iframe embedding on your plan, you can:
+1. Create a button in Canva
+2. Link the button to your deployed form URL
+3. The form will open in a new tab/window
 
-3. Create a `.env` file with your Supabase credentials:
-   ```
-   VITE_SUPABASE_URL=https://pqwwhbwqrojdctdwgyza.supabase.co
-   VITE_SUPABASE_ANON_KEY=[YOUR_NEW_ANON_KEY]
-   ```
+## Features
 
-4. Import and use the component:
-   ```tsx
-   import ContactForm from './components/ContactForm';
-
-   function ContactPage() {
-     return (
-       <div className="min-h-screen bg-gradient-to-br from-gray-50 via-orange-50 to-yellow-50 py-12 px-4">
-         <ContactForm />
-       </div>
-     );
-   }
-   ```
-
-## Responsive Design
-
-The form is fully responsive and will adapt to:
-- Mobile devices (320px+)
-- Tablets (768px+)
-- Desktop (1024px+)
-
-## Security Features
-
-The form includes:
+### Security
 - XSS protection with input sanitization
 - Rate limiting (3 submissions per minute per IP)
 - Honeypot spam prevention
 - Server-side validation
-- Privacy compliance notice
 
-## Email Configuration
+### Design
+- Fully responsive (mobile, tablet, desktop)
+- Matches Paving The Way branding
+- Clean, professional appearance
+- Smooth animations and interactions
 
-Submissions are sent to: **support@pavingthewayfd.org**
+### Email Notifications
+- Submissions are sent to: **support@pavingthewayfd.org**
+- Professional HTML email format
+- Includes all form details and selected services
 
-Make sure the RESEND_API_KEY is configured in your Supabase Edge Functions secrets.
+## Configuration Required
+
+Make sure the following environment variables are set:
+- `VITE_SUPABASE_URL` - Your Supabase project URL (for the email edge function)
+- `VITE_SUPABASE_ANON_KEY` - Your Supabase anonymous key
+- `RESEND_API_KEY` - Your Resend API key (configured in Supabase Edge Functions secrets)
+
+## Testing
+
+Before embedding in Canva:
+1. Test the form by submitting a test entry
+2. Verify you receive the email at support@pavingthewayfd.org
+3. Check that the form displays correctly on different screen sizes
+4. Confirm all service categories expand and collapse properly

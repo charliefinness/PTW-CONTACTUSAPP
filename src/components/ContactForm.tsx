@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { supabase } from '../lib/supabase';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 
 type ServiceCategory = {
@@ -82,19 +81,6 @@ export default function ContactForm() {
     }
 
     try {
-      const contactData = {
-        first_name: formData.first_name,
-        last_name: formData.last_name,
-        email: formData.email,
-        phone: formData.phone || null,
-        message: formData.message || null,
-        interests: selectedInterests,
-      };
-
-      const { error } = await supabase.from('contacts').insert([contactData]);
-
-      if (error) throw error;
-
       const apiUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send-contact-email`;
       const emailResponse = await fetch(apiUrl, {
         method: 'POST',
