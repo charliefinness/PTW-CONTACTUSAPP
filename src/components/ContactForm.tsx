@@ -378,18 +378,16 @@ export default function ContactForm() {
                   {isExpanded && (
                     <div className="p-3 space-y-2 bg-white">
                       {category.services.map((service) => (
-                        <label
+                        <button
                           key={service}
-                          className="flex items-center gap-3 p-2 rounded hover:bg-gray-50 cursor-pointer transition-colors"
+                          type="button"
+                          onClick={() => toggleService(service)}
+                          className={`flex items-center gap-3 p-2 rounded hover:bg-gray-50 cursor-pointer transition-colors w-full text-left ${
+                            selectedInterests.includes(service) ? 'bg-orange-50' : ''
+                          }`}
                         >
-                          <input
-                            type="checkbox"
-                            checked={selectedInterests.includes(service)}
-                            onChange={() => toggleService(service)}
-                            className="w-4 h-4 text-orange-500 border-gray-300 rounded focus:ring-orange-400"
-                          />
                           <span className="text-sm text-gray-700">{service}</span>
-                        </label>
+                        </button>
                       ))}
                     </div>
                   )}
