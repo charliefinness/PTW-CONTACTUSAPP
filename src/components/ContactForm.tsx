@@ -55,15 +55,23 @@ const SERVICE_CATEGORIES: ServiceCategory[] = [
 
 export default function ContactForm() {
   const [formData, setFormData] = useState({
-    first_name: '',
-    last_name: '',
-    email: '',
-    phone: '',
-    message: '',
+    first_name: 'Maria',
+    last_name: 'Rodriguez',
+    email: 'maria.rodriguez@example.com',
+    phone: '(555) 234-5678',
+    message: 'I recently completed my sentence and am looking for help with employment opportunities and housing assistance. I have experience in construction and am interested in getting certified in skilled trades.',
     honeypot: '',
   });
-  const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
-  const [expandedCategories, setExpandedCategories] = useState<string[]>([]);
+  const [selectedInterests, setSelectedInterests] = useState<string[]>([
+    'Job Training / Certifications',
+    'Reentry Employment Help',
+    'Skilled Trades Training',
+    'Eviction Help / Tenant Rights',
+  ]);
+  const [expandedCategories, setExpandedCategories] = useState<string[]>([
+    'Employment & Training',
+    'Housing & Stability',
+  ]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const [validationError, setValidationError] = useState('');
