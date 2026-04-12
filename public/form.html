@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Contact Us — Paving The Way Foundation</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #fefce8 0%, #fff7ed 50%, #f0fdf4 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 2rem 1rem;
+    }
+
+    .card {
+      width: 100%;
+      max-width: 720px;
+      background: #fff;
+      border-radius: 1.25rem;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.10), 0 4px 16px rgba(0,0,0,0.06);
+      padding: 2.5rem 2.5rem;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    .header img {
+      width: 112px;
+      height: 112px;
+      object-fit: contain;
+      margin: 0 auto 1rem;
+      display: block;
+    }
+
+    .header h1 {
+      font-size: 2.25rem;
+      font-weight: 800;
+      background: linear-gradient(90deg, #eab308, #f97316, #16a34a);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 0.4rem;
+      letter-spacing: -0.5px;
+    }
+
+    .header p {
+      color: #4b5563;
+      font-size: 1.05rem;
+    }
+
+    .alert {
+      padding: 1rem 1.25rem;
+      border-radius: 0.6rem;
+      margin-bottom: 1.25rem;
+      font-weight: 500;
+      font-size: 0.95rem;
+      display: none;
+    }
+
+    .alert.show { display: block; }
+
+    .alert-success {
+      background: linear-gradient(135deg, #fefce8, #fff7ed, #f0fdf4);
+      border: 2px solid #fb923c;
+      color: #9a3412;
+    }
+
+    .alert-error {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      color: #991b1b;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.25rem;
+      margin-bottom: 1.25rem;
+    }
+
+    @media (max-width: 540px) {
+      .form-row { grid-template-columns: 1fr; }
+      .card { padding: 1.5rem 1.25rem; }
+      .header h1 { font-size: 1.75rem; }
+    }
+
+    .field { margin-bottom: 1.25rem; }
+
+    label {
+      display: block;
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: #374151;
+      margin-bottom: 0.5rem;
+    }
+
+    input[type="text"],
+    input[type="email"],
+    input[type="tel"],
+    textarea {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border: 1.5px solid #d1d5db;
+      border-radius: 0.5rem;
+      font-size: 1rem;
+      color: #111827;
+      background: #fff;
+      transition: border-color 0.15s, box-shadow 0.15s;
+      outline: none;
+      font-family: inherit;
+    }
+
+    input:focus, textarea:focus {
+      border-color: #f97316;
+      box-shadow: 0 0 0 3px rgba(249,115,22,0.15);
+    }
+
+    textarea { resize: none; }
+
+    .services-label-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 0.6rem;
+    }
+
+    .selected-count {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #ea580c;
+    }
+
+    .validation-error {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-radius: 0.5rem;
+      padding: 0.6rem 0.8rem;
+      font-size: 0.875rem;
+      color: #991b1b;
+      margin-bottom: 0.75rem;
+      display: none;
+    }
+
+    .validation-error.show { display: block; }
+
+    .services-box {
+      border: 1.5px solid #d1d5db;
+      border-radius: 0.6rem;
+      padding: 0.75rem;
+      max-height: 380px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+    }
+
+    .services-box::-webkit-scrollbar { width: 6px; }
+    .services-box::-webkit-scrollbar-track { background: #f9fafb; border-radius: 4px; }
+    .services-box::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 4px; }
+
+    .category {
+      border: 1px solid #e5e7eb;
+      border-radius: 0.5rem;
+      overflow: hidden;
+    }
+
+    .category-header {
+      background: #f9fafb;
+      padding: 0.6rem 0.75rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .category-toggle {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: none;
+      border: none;
+      cursor: pointer;
+      flex: 1;
+      text-align: left;
+      padding: 0;
+    }
+
+    .category-toggle:focus { outline: none; }
+
+    .chevron {
+      width: 16px;
+      height: 16px;
+      color: #6b7280;
+      flex-shrink: 0;
+      transition: transform 0.2s;
+    }
+
+    .category.open .chevron { transform: rotate(180deg); }
+
+    .category-name {
+      font-weight: 600;
+      font-size: 0.9rem;
+      color: #111827;
+    }
+
+    .partial-count {
+      font-size: 0.75rem;
+      color: #ea580c;
+      margin-left: 0.25rem;
+    }
+
+    .select-all-btn {
+      padding: 0.25rem 0.75rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+      border-radius: 0.375rem;
+      border: none;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+      background: #e5e7eb;
+      color: #374151;
+      white-space: nowrap;
+    }
+
+    .select-all-btn:hover { background: #d1d5db; }
+    .select-all-btn.partial { background: #ffedd5; color: #c2410c; }
+    .select-all-btn.partial:hover { background: #fed7aa; }
+    .select-all-btn.full { background: linear-gradient(90deg, #f97316, #ea580c); color: #fff; }
+    .select-all-btn.full:hover { background: linear-gradient(90deg, #ea580c, #c2410c); }
+
+    .category-services {
+      display: none;
+      padding: 0.5rem 0.75rem;
+      background: #fff;
+      gap: 0.1rem;
+      flex-direction: column;
+    }
+
+    .category.open .category-services { display: flex; }
+
+    .service-item {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 0.4rem 0.5rem;
+      border-radius: 0.375rem;
+      cursor: pointer;
+      transition: background 0.12s;
+    }
+
+    .service-item:hover { background: #f9fafb; }
+
+    .service-item input[type="checkbox"] {
+      width: 16px;
+      height: 16px;
+      accent-color: #f97316;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    .service-item span {
+      font-size: 0.875rem;
+      color: #374151;
+      cursor: pointer;
+    }
+
+    .privacy-notice {
+      font-size: 0.8rem;
+      color: #6b7280;
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+      border-radius: 0.5rem;
+      padding: 0.875rem 1rem;
+      margin-bottom: 1.25rem;
+      line-height: 1.5;
+    }
+
+    .submit-btn {
+      width: 100%;
+      padding: 1rem;
+      background: linear-gradient(90deg, #eab308, #f97316, #ea580c);
+      color: #fff;
+      font-size: 1rem;
+      font-weight: 700;
+      border: none;
+      border-radius: 0.6rem;
+      cursor: pointer;
+      box-shadow: 0 4px 14px rgba(249,115,22,0.35);
+      transition: transform 0.15s, box-shadow 0.15s, opacity 0.15s;
+      letter-spacing: 0.01em;
+    }
+
+    .submit-btn:hover:not(:disabled) {
+      transform: scale(1.015);
+      box-shadow: 0 6px 20px rgba(249,115,22,0.45);
+    }
+
+    .submit-btn:disabled { opacity: 0.55; cursor: not-allowed; transform: none; }
+
+    .honeypot { position: absolute; left: -9999px; width: 0; height: 0; opacity: 0; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="header">
+      <img src="/ptw_logo.png" alt="Paving The Way Foundation" />
+      <h1>Contact Us</h1>
+      <p>We're here to help pave your way forward</p>
+    </div>
+
+    <div id="alert-success" class="alert alert-success">
+      Thank you for reaching out! We'll get back to you soon.
+    </div>
+    <div id="alert-error" class="alert alert-error">
+      Something went wrong. Please try again or contact us directly.
+    </div>
+
+    <form id="contact-form" novalidate>
+      <div class="form-row">
+        <div>
+          <label for="first_name">First Name *</label>
+          <input type="text" id="first_name" name="first_name" required placeholder="John" />
+        </div>
+        <div>
+          <label for="last_name">Last Name *</label>
+          <input type="text" id="last_name" name="last_name" required placeholder="Smith" />
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="email">Email Address *</label>
+        <input type="email" id="email" name="email" required placeholder="john.smith@example.com" />
+      </div>
+
+      <div class="field">
+        <label for="phone">Phone Number</label>
+        <input type="tel" id="phone" name="phone" placeholder="(555) 123-4567" />
+      </div>
+
+      <div class="field">
+        <div class="services-label-row">
+          <label style="margin-bottom:0">What Services Are You Looking For? *</label>
+          <span id="selected-count" class="selected-count" style="display:none"></span>
+        </div>
+
+        <div id="validation-error" class="validation-error">Please select at least one service</div>
+
+        <div class="services-box" id="services-box"></div>
+      </div>
+
+      <div class="field">
+        <label for="message">Message</label>
+        <textarea id="message" name="message" rows="4" placeholder="Tell us more about how we can help..."></textarea>
+      </div>
+
+      <input type="text" name="honeypot" id="honeypot" class="honeypot" autocomplete="off" tabindex="-1" aria-hidden="true" />
+
+      <p class="privacy-notice">
+        By submitting this form, you agree to our collection and use of your personal information as described in our privacy policy. We will only use your information to respond to your inquiry and provide the services you requested.
+      </p>
+
+      <button type="submit" class="submit-btn" id="submit-btn">Submit</button>
+    </form>
+  </div>
+
+  <script>
+    const SUPABASE_URL = 'https://pqwwhbwqrojdctdwgyza.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBxd3doYndxcm9qZGN0ZHdneXphIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA2MDg2MzIsImV4cCI6MjA4NjE4NDYzMn0.o8S0zQTkrtxqHa2-CvMFXu6ASY99TntJwhAjnyAOIH0';
+
+    const SERVICE_CATEGORIES = [
+      {
+        name: 'Employment & Training',
+        services: ['Job Training / Certifications','Paid Work & Job Placement','Reentry Employment Help','Youth Job Readiness','Skilled Trades Training'],
+      },
+      {
+        name: 'Reentry & Case Support',
+        services: ['Reentry Support Services','Care Management Support','Help Getting ID / Documents','Mental Health / Recovery Help'],
+      },
+      {
+        name: 'Housing & Stability',
+        services: ['Eviction Help / Tenant Rights','Emergency Financial Help','Transportation Assistance'],
+      },
+      {
+        name: 'Basic Needs',
+        services: ['Food Assistance','Clothing Assistance','General Community Help'],
+      },
+      {
+        name: 'Special Programs',
+        services: ['Justice-Impacted Women','Foster / Transition-Age Youth','DOR Employment Services','Employed Client Emergency Help'],
+      },
+      {
+        name: 'Intake / Routing',
+        services: ['Not Sure — Need Guidance','Referred by Another Agency'],
+      },
+    ];
+
+    let selectedInterests = [];
+
+    function updateSelectedCount() {
+      const el = document.getElementById('selected-count');
+      if (selectedInterests.length > 0) {
+        el.textContent = selectedInterests.length + ' selected';
+        el.style.display = 'inline';
+      } else {
+        el.style.display = 'none';
+      }
+    }
+
+    function getCategoryState(category) {
+      const all = category.services.every(s => selectedInterests.includes(s));
+      const some = category.services.some(s => selectedInterests.includes(s));
+      return all ? 'full' : some ? 'partial' : 'none';
+    }
+
+    function updateCategoryUI(categoryEl, category) {
+      const state = getCategoryState(category);
+      const btn = categoryEl.querySelector('.select-all-btn');
+      const partialEl = categoryEl.querySelector('.partial-count');
+
+      btn.className = 'select-all-btn ' + (state === 'full' ? 'full' : state === 'partial' ? 'partial' : '');
+      btn.textContent = state === 'full' ? 'Deselect All' : 'Select All';
+
+      const isOpen = categoryEl.classList.contains('open');
+      if (!isOpen && state === 'partial') {
+        const count = category.services.filter(s => selectedInterests.includes(s)).length;
+        partialEl.textContent = '(' + count + '/' + category.services.length + ')';
+        partialEl.style.display = 'inline';
+      } else {
+        partialEl.style.display = 'none';
+      }
+
+      const checkboxes = categoryEl.querySelectorAll('input[type="checkbox"]');
+      checkboxes.forEach((cb, i) => {
+        cb.checked = selectedInterests.includes(category.services[i]);
+      });
+    }
+
+    function buildServicesUI() {
+      const box = document.getElementById('services-box');
+      box.innerHTML = '';
+
+      SERVICE_CATEGORIES.forEach(category => {
+        const catEl = document.createElement('div');
+        catEl.className = 'category';
+        catEl.dataset.name = category.name;
+
+        const header = document.createElement('div');
+        header.className = 'category-header';
+
+        const toggleBtn = document.createElement('button');
+        toggleBtn.type = 'button';
+        toggleBtn.className = 'category-toggle';
+        toggleBtn.innerHTML = `
+          <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+          <span class="category-name">${category.name}</span>
+          <span class="partial-count" style="display:none"></span>
+        `;
+
+        toggleBtn.addEventListener('click', () => {
+          const isOpen = catEl.classList.toggle('open');
+          const partialEl = catEl.querySelector('.partial-count');
+          if (isOpen) {
+            partialEl.style.display = 'none';
+          } else {
+            updateCategoryUI(catEl, category);
+          }
+        });
+
+        const selectAllBtn = document.createElement('button');
+        selectAllBtn.type = 'button';
+        selectAllBtn.className = 'select-all-btn';
+        selectAllBtn.textContent = 'Select All';
+
+        selectAllBtn.addEventListener('click', () => {
+          const state = getCategoryState(category);
+          if (state === 'full') {
+            selectedInterests = selectedInterests.filter(s => !category.services.includes(s));
+          } else {
+            category.services.forEach(s => {
+              if (!selectedInterests.includes(s)) selectedInterests.push(s);
+            });
+          }
+          document.getElementById('validation-error').classList.remove('show');
+          updateSelectedCount();
+          updateCategoryUI(catEl, category);
+        });
+
+        header.appendChild(toggleBtn);
+        header.appendChild(selectAllBtn);
+
+        const servicesDiv = document.createElement('div');
+        servicesDiv.className = 'category-services';
+
+        category.services.forEach(service => {
+          const item = document.createElement('label');
+          item.className = 'service-item';
+
+          const cb = document.createElement('input');
+          cb.type = 'checkbox';
+          cb.checked = selectedInterests.includes(service);
+
+          cb.addEventListener('change', () => {
+            if (cb.checked) {
+              if (!selectedInterests.includes(service)) selectedInterests.push(service);
+            } else {
+              selectedInterests = selectedInterests.filter(s => s !== service);
+            }
+            document.getElementById('validation-error').classList.remove('show');
+            updateSelectedCount();
+            updateCategoryUI(catEl, category);
+          });
+
+          const span = document.createElement('span');
+          span.textContent = service;
+
+          item.appendChild(cb);
+          item.appendChild(span);
+          servicesDiv.appendChild(item);
+        });
+
+        catEl.appendChild(header);
+        catEl.appendChild(servicesDiv);
+        box.appendChild(catEl);
+      });
+    }
+
+    buildServicesUI();
+
+    document.getElementById('contact-form').addEventListener('submit', async function(e) {
+      e.preventDefault();
+
+      const successEl = document.getElementById('alert-success');
+      const errorEl = document.getElementById('alert-error');
+      const validationEl = document.getElementById('validation-error');
+      const btn = document.getElementById('submit-btn');
+
+      successEl.classList.remove('show');
+      errorEl.classList.remove('show');
+      validationEl.classList.remove('show');
+
+      if (selectedInterests.length === 0) {
+        validationEl.classList.add('show');
+        return;
+      }
+
+      const firstName = document.getElementById('first_name').value.trim();
+      const lastName = document.getElementById('last_name').value.trim();
+      const email = document.getElementById('email').value.trim();
+      const phone = document.getElementById('phone').value.trim();
+      const message = document.getElementById('message').value.trim();
+      const honeypot = document.getElementById('honeypot').value;
+
+      if (!firstName || !lastName || !email) {
+        validationEl.textContent = 'Please fill in all required fields.';
+        validationEl.classList.add('show');
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = 'Sending...';
+
+      try {
+        const res = await fetch(`${SUPABASE_URL}/functions/v1/send-contact-email`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            first_name: firstName,
+            last_name: lastName,
+            email: email,
+            phone: phone || undefined,
+            interests: selectedInterests,
+            message: message || undefined,
+            honeypot: honeypot || undefined,
+          }),
+        });
+
+        if (!res.ok) {
+          let result;
+          try { result = await res.json(); } catch { result = { error: 'Unknown error' }; }
+
+          if (res.status === 429) {
+            validationEl.textContent = 'Too many submissions. Please try again in a moment.';
+            validationEl.classList.add('show');
+          } else if (res.status === 400) {
+            validationEl.textContent = result.error || 'Invalid submission.';
+            validationEl.classList.add('show');
+          } else {
+            errorEl.classList.add('show');
+          }
+          return;
+        }
+
+        successEl.classList.add('show');
+        document.getElementById('contact-form').reset();
+        selectedInterests = [];
+        updateSelectedCount();
+        buildServicesUI();
+
+      } catch (err) {
+        errorEl.classList.add('show');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Submit';
+      }
+    });
+  </script>
+</body>
+</html>
