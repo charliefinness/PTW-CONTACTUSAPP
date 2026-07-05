@@ -1,16 +1,996 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
+<head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Non-Profit CRM Canva Contact Form</title>
-    <meta property="og:image" content="https://bolt.new/static/og_default.png" />
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:image" content="https://bolt.new/static/og_default.png" />
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+    <meta name="color-scheme" content="dark" />
+    <title>PTW Contact Us App</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        navy: { DEFAULT: '#0a0f1e', light: '#111827', lighter: '#1a2236' },
+                        border: '#1f2937',
+                        accent: { blue: '#3b82f6', cyan: '#06b6d4', blueHover: '#2563eb', cyanHover: '#0891b2' },
+                        txt: { primary: '#f9fafb', muted: '#6b7280', dim: '#4b5563' },
+                        success: '#10b981',
+                        warning: '#f59e0b',
+                        danger: '#ef4444',
+                        urgent: '#dc2626'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif']
+                    }
+                }
+            }
+        };
+    </script>
+    <script src="https://unpkg.com/lucide@latest" defer></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+    <style>
+        :root {
+            --navy: #0a0f1e;
+            --card: #111827;
+            --border: #1f2937;
+            --blue: #3b82f6;
+            --cyan: #06b6d4;
+            --text: #f9fafb;
+            --muted: #6b7280;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Inter', system-ui, sans-serif; background: var(--navy); color: var(--text); min-height: 100vh; }
+        .gradient-line { height: 2px; background: linear-gradient(90deg, var(--blue), var(--cyan), var(--blue)); }
+        .tab-active { color: var(--blue); border-bottom: 2px solid var(--blue); }
+        .tab-inactive { color: var(--muted); border-bottom: 2px solid transparent; }
+        .tab-inactive:hover { color: var(--text); }
+        .fade-in { animation: fadeIn 0.35s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-12px); } }
+        .particle { position: absolute; border-radius: 50%; background: rgba(59,130,246,0.15); animation: float 6s ease-in-out infinite; pointer-events: none; }
+        .priority-seg input:checked + label { font-weight: 600; }
+        .priority-seg input[value="low"]:checked + label { background: rgba(16,185,129,0.2); border-color: var(--success); color: var(--success); }
+        .priority-seg input[value="medium"]:checked + label { background: rgba(245,158,11,0.2); border-color: var(--warning); color: var(--warning); }
+        .priority-seg input[value="high"]:checked + label { background: rgba(239,68,68,0.2); border-color: var(--danger); color: var(--danger); }
+        .priority-seg input[value="urgent"]:checked + label { background: rgba(220,38,38,0.25); border-color: #dc2626; color: #dc2626; }
+        .drop-zone { border: 2px dashed var(--border); transition: border-color 0.2s, background 0.2s; }
+        .drop-zone.drag-over { border-color: var(--blue); background: rgba(59,130,246,0.08); }
+        .input-field { background: #0d1321; border: 1px solid var(--border); color: var(--text); transition: border-color 0.2s, box-shadow 0.2s; }
+        .input-field:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(59,130,246,0.15); outline: none; }
+        .input-field::placeholder { color: #4b5563; }
+        .input-error { border-color: var(--danger) !important; }
+        .error-msg { color: var(--danger); font-size: 0.75rem; margin-top: 2px; min-height: 1rem; }
+        @keyframes checkmark { 0% { stroke-dashoffset: 50; } 100% { stroke-dashoffset: 0; } }
+        .checkmark-circle { stroke-dasharray: 166; stroke-dashoffset: 166; animation: checkmark 0.6s ease-in-out forwards; }
+        .checkmark-check { stroke-dasharray: 50; stroke-dashoffset: 50; animation: checkmark 0.4s 0.4s ease-in-out forwards; }
+        .badge { display: inline-flex; align-items: center; padding: 2px 10px; border-radius: 9999px; font-size: 0.7rem; font-weight: 600; letter-spacing: 0.02em; }
+        .badge-low { background: rgba(16,185,129,0.15); color: #34d399; }
+        .badge-medium { background: rgba(245,158,11,0.15); color: #fbbf24; }
+        .badge-high { background: rgba(239,68,68,0.15); color: #f87171; }
+        .badge-urgent { background: rgba(220,38,38,0.2); color: #ef4444; }
+        .badge-open { background: rgba(59,130,246,0.15); color: #60a5fa; }
+        .badge-inprogress { background: rgba(245,158,11,0.15); color: #fbbf24; }
+        .badge-resolved { background: rgba(16,185,129,0.15); color: #34d399; }
+        .badge-closed { background: rgba(107,114,128,0.2); color: #9ca3af; }
+        .toast { position: fixed; bottom: 24px; right: 24px; z-index: 9999; padding: 12px 20px; border-radius: 12px; font-size: 0.875rem; font-weight: 500; color: #fff; box-shadow: 0 8px 24px rgba(0,0,0,0.4); animation: slideInToast 0.35s ease-out; max-width: 380px; }
+        @keyframes slideInToast { from { opacity: 0; transform: translateX(40px); } to { opacity: 1; transform: translateX(0); } }
+        .toast-success { background: linear-gradient(135deg, #059669, #10b981); }
+        .toast-info { background: linear-gradient(135deg, #2563eb, #3b82f6); }
+        .toast-danger { background: linear-gradient(135deg, #dc2626, #ef4444); }
+        .toast-warning { background: linear-gradient(135deg, #d97706, #f59e0b); }
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); z-index: 1000; display: flex; align-items: center; justify-content: center; }
+        .stat-card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 20px 24px; }
+        th[data-sort] { cursor: pointer; user-select: none; }
+        th[data-sort]:hover { color: var(--blue); }
+        .ai-suggestion { animation: fadeIn 0.4s ease-out; }
+        .spinner { border: 3px solid rgba(255,255,255,0.15); border-top-color: #fff; border-radius: 50%; width: 20px; height: 20px; animation: spin 0.7s linear infinite; display: inline-block; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        select.input-field { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%236b7280' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; }
+        select.input-field option { background: #111827; color: #f9fafb; }
+        .table-row:hover { background: rgba(59,130,246,0.04); }
+        @media print { .no-print { display: none !important; } }
+    </style>
+</head>
+<body data-id="0" class="min-h-screen flex flex-col">
+    <app-icon data-id="1" hidden data-icon="mail" data-palette="Blue"></app-icon>
+
+    <!-- Header -->
+    <header data-id="2" id="header-k8m2" class="bg-navy-light border-b border-border sticky top-0 z-50 no-print">
+        <div data-id="3" class="max-w-7xl mx-auto px-4 md:px-6 lg:px-8 flex items-center justify-between h-16">
+            <!-- Logo -->
+            <div data-id="4" class="flex items-center gap-3">
+                <div data-id="5" class="w-9 h-9 rounded-lg bg-accent-blue flex items-center justify-center">
+                    <span data-id="6" class="text-white font-extrabold text-lg leading-none">P</span>
+                </div>
+                <div data-id="7" class="flex items-baseline gap-2">
+                    <span data-id="8" class="text-white font-bold text-xl tracking-tight">PTW</span>
+                    <span data-id="9" class="text-txt-muted text-sm hidden sm:inline">Client Portal</span>
+                </div>
+            </div>
+            <!-- Desktop Nav -->
+            <nav data-id="10" class="hidden md:flex items-center gap-1">
+                <button data-id="11" id="tab-submit-d3k1" class="tab-active px-4 py-2 text-sm font-medium transition-colors flex items-center gap-2">
+                    <i data-id="12" data-lucide="mail-plus" class="w-4 h-4"></i> Submit a Request
+                </button>
+                <button data-id="13" id="tab-admin-f7j2" class="tab-inactive px-4 py-2 text-sm font-medium transition-colors flex items-center gap-2">
+                    <i data-id="14" data-lucide="layout-dashboard" class="w-4 h-4"></i> Admin View
+                </button>
+            </nav>
+            <!-- Mobile menu button -->
+            <button data-id="15" id="mobile-menu-btn-x9z3" class="md:hidden p-2 text-txt-muted hover:text-white transition-colors">
+                <i data-id="16" data-lucide="menu" class="w-6 h-6"></i>
+            </button>
+        </div>
+        <div data-id="17" class="gradient-line"></div>
+    </header>
+
+    <!-- Mobile Nav -->
+    <nav data-id="18" id="mobile-menu-r4t5" class="hidden fixed inset-0 bg-navy z-[60] flex flex-col p-6">
+        <div data-id="19" class="flex justify-between items-center mb-8">
+            <div data-id="20" class="flex items-center gap-2">
+                <div data-id="21" class="w-8 h-8 rounded-lg bg-accent-blue flex items-center justify-center">
+                    <span data-id="22" class="text-white font-extrabold text-base">P</span>
+                </div>
+                <span data-id="23" class="text-white font-bold text-lg">PTW</span>
+            </div>
+            <button data-id="24" id="mobile-menu-close-q2w4" class="p-2 text-txt-muted hover:text-white">
+                <i data-id="25" data-lucide="x" class="w-6 h-6"></i>
+            </button>
+        </div>
+        <button data-id="26" id="mob-tab-submit-m5n6" class="w-full text-left px-4 py-4 text-white font-medium flex items-center gap-3 rounded-xl hover:bg-navy-light transition-colors">
+            <i data-id="27" data-lucide="mail-plus" class="w-5 h-5 text-accent-blue"></i> Submit a Request
+        </button>
+        <button data-id="28" id="mob-tab-admin-p8q9" class="w-full text-left px-4 py-4 text-txt-muted font-medium flex items-center gap-3 rounded-xl hover:bg-navy-light transition-colors mt-1">
+            <i data-id="29" data-lucide="layout-dashboard" class="w-5 h-5"></i> Admin View
+        </button>
+    </nav>
+
+    <!-- MAIN -->
+    <main data-id="30" class="flex-1">
+        <!-- VIEW 1: Submit a Request -->
+        <div data-id="31" id="view-submit-a1b2" class="fade-in">
+            <!-- Hero -->
+            <section data-id="32" id="hero-c3d4" class="relative overflow-hidden py-12 md:py-20 px-4 text-center">
+                <div data-id="33" class="particle w-3 h-3 top-[15%] left-[10%]" style="animation-delay:0s;animation-duration:7s;"></div>
+                <div data-id="34" class="particle w-2 h-2 top-[30%] right-[15%]" style="animation-delay:1.5s;animation-duration:5s;"></div>
+                <div data-id="35" class="particle w-4 h-4 bottom-[20%] left-[25%]" style="animation-delay:3s;animation-duration:8s;"></div>
+                <div data-id="36" class="particle w-2 h-2 top-[50%] right-[30%]" style="animation-delay:2s;animation-duration:6s;"></div>
+                <div data-id="37" class="particle w-3 h-3 bottom-[30%] right-[8%]" style="animation-delay:4s;animation-duration:9s;"></div>
+                <div data-id="38" class="particle w-2 h-2 top-[10%] left-[60%]" style="animation-delay:1s;animation-duration:6.5s;opacity:0.6;"></div>
+                <div data-id="39" class="relative z-10">
+                    <h1 data-id="40" class="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-3">How can we help you today?</h1>
+                    <p data-id="41" class="text-txt-muted text-base md:text-lg max-w-xl mx-auto">Our team typically responds within 2 business hours.</p>
+                </div>
+            </section>
+
+            <!-- Contact Form -->
+            <section data-id="42" id="form-section-e5f6" class="px-4 md:px-6 pb-16 -mt-4">
+                <div data-id="43" class="max-w-2xl mx-auto bg-navy-light border border-border rounded-2xl p-6 md:p-8 shadow-2xl shadow-black/20">
+                    <!-- Form -->
+                    <form data-id="44" id="contact-form-g7h8" class="space-y-5" novalidate>
+                        <!-- Row 1: Name + Email -->
+                        <div data-id="45" class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                            <div data-id="46">
+                                <label data-id="47" class="block text-sm font-medium text-txt-primary mb-1.5">Full Name <span data-id="48" class="text-danger">*</span></label>
+                                <input data-id="49" id="field-name-i9j0" type="text" class="input-field w-full h-11 px-4 rounded-xl text-sm" placeholder="Your full name" required />
+                                <div data-id="50" class="error-msg" id="err-name-k1l2"></div>
+                            </div>
+                            <div data-id="51">
+                                <label data-id="52" class="block text-sm font-medium text-txt-primary mb-1.5">Email Address <span data-id="53" class="text-danger">*</span></label>
+                                <input data-id="54" id="field-email-m3n4" type="email" class="input-field w-full h-11 px-4 rounded-xl text-sm" placeholder="you@company.com" required />
+                                <div data-id="55" class="error-msg" id="err-email-o5p6"></div>
+                            </div>
+                        </div>
+                        <!-- Row 2: Phone + Company -->
+                        <div data-id="56" class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                            <div data-id="57">
+                                <label data-id="58" class="block text-sm font-medium text-txt-primary mb-1.5">Phone Number</label>
+                                <input data-id="59" id="field-phone-q7r8" type="tel" class="input-field w-full h-11 px-4 rounded-xl text-sm" placeholder="+1 (555) 000-0000" />
+                            </div>
+                            <div data-id="60">
+                                <label data-id="61" class="block text-sm font-medium text-txt-primary mb-1.5">Company</label>
+                                <input data-id="62" id="field-company-s9t0" type="text" class="input-field w-full h-11 px-4 rounded-xl text-sm" placeholder="Your company name" />
+                            </div>
+                        </div>
+                        <!-- Subject -->
+                        <div data-id="63">
+                            <label data-id="64" class="block text-sm font-medium text-txt-primary mb-1.5">Subject <span data-id="65" class="text-danger">*</span></label>
+                            <input data-id="66" id="field-subject-u1v2" type="text" class="input-field w-full h-11 px-4 rounded-xl text-sm" placeholder="Brief subject line" required />
+                            <div data-id="67" class="error-msg" id="err-subject-w3x4"></div>
+                        </div>
+                        <!-- Category + Priority -->
+                        <div data-id="68" class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                            <div data-id="69">
+                                <label data-id="70" class="block text-sm font-medium text-txt-primary mb-1.5">Category <span data-id="71" class="text-danger">*</span></label>
+                                <select data-id="72" id="field-category-y5z6" class="input-field w-full h-11 px-4 rounded-xl text-sm pr-10" required>
+                                    <option data-id="73" value="">Select a category</option>
+                                    <option data-id="74" value="General Inquiry">General Inquiry</option>
+                                    <option data-id="75" value="Technical Support">Technical Support</option>
+                                    <option data-id="76" value="Billing & Accounts">Billing & Accounts</option>
+                                    <option data-id="77" value="New Service Request">New Service Request</option>
+                                    <option data-id="78" value="Partnership">Partnership</option>
+                                    <option data-id="79" value="Feedback / Complaint">Feedback / Complaint</option>
+                                    <option data-id="80" value="Other">Other</option>
+                                </select>
+                                <div data-id="81" class="error-msg" id="err-category-a7b8"></div>
+                                <div data-id="82" id="ai-cat-suggest-c9d0" class="hidden ai-suggestion mt-1.5"></div>
+                            </div>
+                            <div data-id="83">
+                                <label data-id="84" class="block text-sm font-medium text-txt-primary mb-1.5">Priority <span data-id="85" class="text-danger">*</span></label>
+                                <div data-id="86" class="priority-seg flex gap-1.5 flex-wrap">
+                                    <input data-id="87" type="radio" name="priority" value="low" id="pri-low-e1f2" class="hidden" />
+                                    <label data-id="88" for="pri-low-e1f2" class="flex-1 min-w-[70px] text-center text-xs font-medium py-2.5 px-2 rounded-lg border border-border cursor-pointer transition-all hover:border-success/50">🟢 Low</label>
+                                    <input data-id="89" type="radio" name="priority" value="medium" id="pri-med-g3h4" class="hidden" />
+                                    <label data-id="90" for="pri-med-g3h4" class="flex-1 min-w-[70px] text-center text-xs font-medium py-2.5 px-2 rounded-lg border border-border cursor-pointer transition-all hover:border-warning/50">🟡 Medium</label>
+                                    <input data-id="91" type="radio" name="priority" value="high" id="pri-high-i5j6" class="hidden" />
+                                    <label data-id="92" for="pri-high-i5j6" class="flex-1 min-w-[70px] text-center text-xs font-medium py-2.5 px-2 rounded-lg border border-border cursor-pointer transition-all hover:border-danger/50">🔴 High</label>
+                                    <input data-id="93" type="radio" name="priority" value="urgent" id="pri-urg-k7l8" class="hidden" />
+                                    <label data-id="94" for="pri-urg-k7l8" class="flex-1 min-w-[70px] text-center text-xs font-medium py-2.5 px-2 rounded-lg border border-border cursor-pointer transition-all hover:border-urgent/50">🚨 Urgent</label>
+                                </div>
+                                <div data-id="95" class="error-msg" id="err-priority-m9n0"></div>
+                                <div data-id="96" id="ai-pri-suggest-o1p2" class="hidden ai-suggestion mt-1.5"></div>
+                            </div>
+                        </div>
+                        <!-- Message -->
+                        <div data-id="97">
+                            <label data-id="98" class="block text-sm font-medium text-txt-primary mb-1.5">Message <span data-id="99" class="text-danger">*</span></label>
+                            <textarea data-id="100" id="field-message-q3r4" rows="5" class="input-field w-full px-4 py-3 rounded-xl text-sm resize-y" placeholder="Describe your request in detail..." required></textarea>
+                            <div data-id="101" class="error-msg" id="err-message-s5t6"></div>
+                        </div>
+                        <!-- File Upload -->
+                        <div data-id="102">
+                            <label data-id="103" class="block text-sm font-medium text-txt-primary mb-1.5">Attach File</label>
+                            <div data-id="104" id="drop-zone-u7v8" class="drop-zone rounded-xl p-6 text-center cursor-pointer transition-all">
+                                <div data-id="105" class="flex flex-col items-center gap-2">
+                                    <i data-id="106" data-lucide="upload-cloud" class="w-8 h-8 text-txt-muted"></i>
+                                    <p data-id="107" class="text-sm text-txt-muted"><span data-id="108" class="text-accent-blue font-medium">Click to upload</span> or drag and drop</p>
+                                    <p data-id="109" class="text-xs text-txt-dim">PDF, PNG, JPG, DOCX (max 10 MB)</p>
+                                </div>
+                                <input data-id="110" id="file-input-w9x0" type="file" accept=".pdf,.png,.jpg,.jpeg,.docx" class="hidden" />
+                            </div>
+                            <div data-id="111" id="file-preview-y1z2" class="hidden mt-2 flex items-center gap-2 text-sm text-txt-primary bg-navy rounded-lg px-3 py-2 border border-border">
+                                <i data-id="112" data-lucide="file" class="w-4 h-4 text-accent-blue"></i>
+                                <span data-id="113" id="file-name-a3b4" class="flex-1 truncate"></span>
+                                <button data-id="114" type="button" id="file-remove-c5d6" class="text-danger hover:text-red-300 transition-colors p-1">
+                                    <i data-id="115" data-lucide="x" class="w-4 h-4"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <!-- Actions -->
+                        <div data-id="116" class="flex items-center justify-between pt-2 flex-wrap gap-3">
+                            <button data-id="117" type="button" id="clear-draft-e7f8" class="text-sm text-txt-muted hover:text-txt-primary transition-colors flex items-center gap-1.5">
+                                <i data-id="118" data-lucide="trash-2" class="w-4 h-4"></i> Clear draft
+                            </button>
+                            <button data-id="119" type="submit" id="submit-btn-g9h0" class="bg-accent-blue hover:bg-accent-blueHover text-white font-semibold px-8 py-3 rounded-xl text-sm transition-all flex items-center gap-2 min-h-[44px]">
+                                <i data-id="120" data-lucide="send" class="w-4 h-4"></i> Submit Request
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- Success Screen (hidden) -->
+                    <div data-id="121" id="success-screen-i1j2" class="hidden text-center py-8 fade-in">
+                        <div data-id="122" class="flex justify-center mb-5">
+                            <svg data-id="123" width="80" height="80" viewBox="0 0 80 80">
+                                <circle data-id="124" cx="40" cy="40" r="36" fill="none" stroke="#10b981" stroke-width="3" class="checkmark-circle" />
+                                <path data-id="125" d="M24 42 L34 52 L56 30" fill="none" stroke="#10b981" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="checkmark-check" />
+                            </svg>
+                        </div>
+                        <h2 data-id="126" class="text-2xl font-bold text-white mb-2">Request Submitted!</h2>
+                        <div data-id="127" id="ticket-number-k3l4" class="inline-block bg-accent-blue/10 text-accent-blue font-mono font-bold text-lg px-4 py-1.5 rounded-lg mb-4"></div>
+                        <div data-id="128" id="ai-reply-m5n6" class="bg-navy rounded-xl p-5 text-left text-sm text-txt-primary/90 leading-relaxed border border-border max-w-lg mx-auto mb-6"></div>
+                        <button data-id="129" id="submit-another-o7p8" class="bg-accent-blue hover:bg-accent-blueHover text-white font-semibold px-6 py-3 rounded-xl text-sm transition-all inline-flex items-center gap-2">
+                            <i data-id="130" data-lucide="plus" class="w-4 h-4"></i> Submit Another Request
+                        </button>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- VIEW 2: Admin View -->
+        <div data-id="131" id="view-admin-q9r0" class="hidden fade-in">
+            <!-- Password Gate -->
+            <div data-id="132" id="admin-gate-s1t2" class="flex items-center justify-center min-h-[60vh] px-4">
+                <div data-id="133" class="bg-navy-light border border-border rounded-2xl p-8 max-w-sm w-full text-center shadow-2xl shadow-black/20">
+                    <div data-id="134" class="w-14 h-14 rounded-2xl bg-accent-blue/10 flex items-center justify-center mx-auto mb-5">
+                        <i data-id="135" data-lucide="lock" class="w-7 h-7 text-accent-blue"></i>
+                    </div>
+                    <h2 data-id="136" class="text-xl font-bold text-white mb-1">Admin Access</h2>
+                    <p data-id="137" class="text-txt-muted text-sm mb-5">Enter the admin password to continue.</p>
+                    <input data-id="138" id="admin-pass-u3v4" type="password" class="input-field w-full h-11 px-4 rounded-xl text-sm mb-2" placeholder="Password" />
+                    <div data-id="139" id="admin-pass-err-w5x6" class="error-msg mb-3"></div>
+                    <button data-id="140" id="admin-login-y7z8" class="w-full bg-accent-blue hover:bg-accent-blueHover text-white font-semibold py-3 rounded-xl text-sm transition-all">
+                        <span data-id="141" class="flex items-center justify-center gap-2"><i data-id="142" data-lucide="log-in" class="w-4 h-4"></i> Unlock Dashboard</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Admin Dashboard -->
+            <div data-id="143" id="admin-dashboard-a9b0" class="hidden px-4 md:px-6 lg:px-8 py-8 max-w-7xl mx-auto fade-in">
+                <div data-id="144" class="flex items-center justify-between mb-6 flex-wrap gap-3">
+                    <div data-id="145">
+                        <h2 data-id="146" class="text-2xl font-bold text-white">Submissions Dashboard</h2>
+                        <p data-id="147" class="text-txt-muted text-sm mt-0.5">Manage and respond to client requests</p>
+                    </div>
+                    <div data-id="148" class="flex items-center gap-2">
+                        <button data-id="149" id="export-csv-c1d2" class="border border-border text-txt-primary hover:bg-navy-lighter px-4 py-2.5 rounded-xl text-sm font-medium transition-all flex items-center gap-2">
+                            <i data-id="150" data-lucide="download" class="w-4 h-4"></i> Export CSV
+                        </button>
+                        <button data-id="151" id="admin-logout-e3f4" class="border border-danger/30 text-danger hover:bg-danger/10 px-4 py-2.5 rounded-xl text-sm font-medium transition-all flex items-center gap-2">
+                            <i data-id="152" data-lucide="log-out" class="w-4 h-4"></i> Lock
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Stats -->
+                <div data-id="153" id="stats-grid-g5h6" class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                    <div data-id="154" class="stat-card">
+                        <div data-id="155" class="flex items-center gap-2 mb-2"><i data-id="156" data-lucide="inbox" class="w-5 h-5 text-accent-blue"></i><span data-id="157" class="text-txt-muted text-xs font-medium uppercase tracking-wide">Total</span></div>
+                        <div data-id="158" id="stat-total-i7j8" class="text-3xl font-bold text-white tabular-nums">0</div>
+                    </div>
+                    <div data-id="159" class="stat-card">
+                        <div data-id="160" class="flex items-center gap-2 mb-2"><i data-id="161" data-lucide="alert-circle" class="w-5 h-5 text-warning"></i><span data-id="162" class="text-txt-muted text-xs font-medium uppercase tracking-wide">Open</span></div>
+                        <div data-id="163" id="stat-open-k9l0" class="text-3xl font-bold text-white tabular-nums">0</div>
+                    </div>
+                    <div data-id="164" class="stat-card">
+                        <div data-id="165" class="flex items-center gap-2 mb-2"><i data-id="166" data-lucide="bar-chart-3" class="w-5 h-5 text-accent-cyan"></i><span data-id="167" class="text-txt-muted text-xs font-medium uppercase tracking-wide">Avg Priority</span></div>
+                        <div data-id="168" id="stat-priority-m1n2" class="text-3xl font-bold text-white">—</div>
+                    </div>
+                    <div data-id="169" class="stat-card">
+                        <div data-id="170" class="flex items-center gap-2 mb-2"><i data-id="171" data-lucide="calendar-check" class="w-5 h-5 text-success"></i><span data-id="172" class="text-txt-muted text-xs font-medium uppercase tracking-wide">Today</span></div>
+                        <div data-id="173" id="stat-today-o3p4" class="text-3xl font-bold text-white tabular-nums">0</div>
+                    </div>
+                </div>
+
+                <!-- Filters -->
+                <div data-id="174" class="bg-navy-light border border-border rounded-2xl p-4 mb-4 flex flex-wrap gap-3 items-center">
+                    <div data-id="175" class="relative flex-1 min-w-[180px]">
+                        <i data-id="176" data-lucide="search" class="w-4 h-4 text-txt-muted absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none"></i>
+                        <input data-id="177" id="filter-search-q5r6" type="text" class="input-field w-full h-10 pl-10 pr-4 rounded-lg text-sm" placeholder="Search submissions..." />
+                    </div>
+                    <select data-id="178" id="filter-category-s7t8" class="input-field h-10 px-3 rounded-lg text-sm min-w-[140px] pr-8">
+                        <option data-id="179" value="">All Categories</option>
+                        <option data-id="180" value="General Inquiry">General Inquiry</option>
+                        <option data-id="181" value="Technical Support">Technical Support</option>
+                        <option data-id="182" value="Billing & Accounts">Billing & Accounts</option>
+                        <option data-id="183" value="New Service Request">New Service Request</option>
+                        <option data-id="184" value="Partnership">Partnership</option>
+                        <option data-id="185" value="Feedback / Complaint">Feedback / Complaint</option>
+                        <option data-id="186" value="Other">Other</option>
+                    </select>
+                    <select data-id="187" id="filter-priority-u9v0" class="input-field h-10 px-3 rounded-lg text-sm min-w-[120px] pr-8">
+                        <option data-id="188" value="">All Priorities</option>
+                        <option data-id="189" value="low">Low</option>
+                        <option data-id="190" value="medium">Medium</option>
+                        <option data-id="191" value="high">High</option>
+                        <option data-id="192" value="urgent">Urgent</option>
+                    </select>
+                    <select data-id="193" id="filter-status-w1x2" class="input-field h-10 px-3 rounded-lg text-sm min-w-[120px] pr-8">
+                        <option data-id="194" value="">All Statuses</option>
+                        <option data-id="195" value="Open">Open</option>
+                        <option data-id="196" value="In Progress">In Progress</option>
+                        <option data-id="197" value="Resolved">Resolved</option>
+                        <option data-id="198" value="Closed">Closed</option>
+                    </select>
+                </div>
+
+                <!-- Table -->
+                <div data-id="199" class="bg-navy-light border border-border rounded-2xl overflow-hidden">
+                    <div data-id="200" class="overflow-x-auto">
+                        <table data-id="201" class="w-full text-left text-sm">
+                            <thead data-id="202" class="bg-navy-lighter text-xs font-medium uppercase tracking-wide text-txt-muted border-b border-border">
+                                <tr data-id="203">
+                                    <th data-id="204" class="px-4 py-3" data-sort="index"># <i data-id="205" data-lucide="chevrons-up-down" class="w-3 h-3 inline"></i></th>
+                                    <th data-id="206" class="px-4 py-3" data-sort="ticket">Ticket <i data-id="207" data-lucide="chevrons-up-down" class="w-3 h-3 inline"></i></th>
+                                    <th data-id="208" class="px-4 py-3" data-sort="name">Name <i data-id="209" data-lucide="chevrons-up-down" class="w-3 h-3 inline"></i></th>
+                                    <th data-id="210" class="px-4 py-3 hidden lg:table-cell" data-sort="email">Email <i data-id="211" data-lucide="chevrons-up-down" class="w-3 h-3 inline"></i></th>
+                                    <th data-id="212" class="px-4 py-3" data-sort="category">Category <i data-id="213" data-lucide="chevrons-up-down" class="w-3 h-3 inline"></i></th>
+                                    <th data-id="214" class="px-4 py-3" data-sort="priority">Priority <i data-id="215" data-lucide="chevrons-up-down" class="w-3 h-3 inline"></i></th>
+                                    <th data-id="216" class="px-4 py-3 hidden md:table-cell" data-sort="subject">Subject <i data-id="217" data-lucide="chevrons-up-down" class="w-3 h-3 inline"></i></th>
+                                    <th data-id="218" class="px-4 py-3 hidden xl:table-cell" data-sort="date">Date <i data-id="219" data-lucide="chevrons-up-down" class="w-3 h-3 inline"></i></th>
+                                    <th data-id="220" class="px-4 py-3">Status</th>
+                                    <th data-id="221" class="px-4 py-3 text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody data-id="222" id="admin-table-body-y3z4" class="divide-y divide-border"></tbody>
+                        </table>
+                    </div>
+                    <!-- Empty State -->
+                    <div data-id="223" id="empty-state-a5b6" class="hidden py-16 text-center">
+                        <svg data-id="224" class="mx-auto mb-4" width="80" height="80" viewBox="0 0 80 80" fill="none">
+                            <rect data-id="225" x="12" y="18" width="56" height="44" rx="6" stroke="#1f2937" stroke-width="2" fill="none"/>
+                            <path data-id="226" d="M12 30 L40 48 L68 30" stroke="#1f2937" stroke-width="2" fill="none"/>
+                            <circle data-id="227" cx="58" cy="22" r="10" fill="#111827" stroke="#3b82f6" stroke-width="2"/>
+                            <text data-id="228" x="58" y="27" text-anchor="middle" fill="#3b82f6" font-size="12" font-weight="bold">0</text>
+                        </svg>
+                        <p data-id="229" class="text-txt-muted text-sm">No submissions found</p>
+                        <p data-id="230" class="text-txt-dim text-xs mt-1">Submissions will appear here once received.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal for View Detail -->
+    <div data-id="231" id="detail-modal-c7d8" class="modal-overlay hidden">
+        <div data-id="232" class="bg-navy-light border border-border rounded-2xl max-w-lg w-full mx-4 max-h-[90vh] overflow-y-auto shadow-2xl shadow-black/40">
+            <div data-id="233" class="flex items-center justify-between p-5 border-b border-border">
+                <h3 data-id="234" class="text-lg font-bold text-white">Submission Details</h3>
+                <button data-id="235" id="modal-close-e9f0" class="text-txt-muted hover:text-white p-1 transition-colors">
+                    <i data-id="236" data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            <div data-id="237" id="modal-body-g1h2" class="p-5 space-y-4"></div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div data-id="238" id="toast-container-i3j4"></div>
+
+    <!-- Footer -->
+    <footer data-id="239" class="border-t border-border py-6 px-4 text-center no-print">
+        <p data-id="240" class="text-txt-muted text-xs">© 2026 PTW — admin-ptw.com · Made by Copilot</p>
+    </footer>
+
+    <script>
+    // ─── GLOBALS & HELPERS ───
+    const LS_KEY = 'ptw_submissions';
+    const LS_DRAFT = 'ptw_draft';
+    const SS_AUTH = 'ptw_admin_auth';
+    const ADMIN_PASS = 'ptw2025';
+    const PRIORITY_ORDER = { low: 1, medium: 2, high: 3, urgent: 4 };
+    const PRIORITY_LABELS = { low: 'Low', medium: 'Medium', high: 'High', urgent: 'Urgent' };
+
+    function genTicket() { return 'PTW-' + String(Math.floor(100000 + Math.random() * 900000)); }
+    function fmtDate(d) { return new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }); }
+    function fmtDateTime(d) { return new Date(d).toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' }); }
+
+    function getSubmissions() {
+        try { return JSON.parse(localStorage.getItem(LS_KEY)) || []; } catch { return []; }
+    }
+    function saveSubmissions(arr) { localStorage.setItem(LS_KEY, JSON.stringify(arr)); }
+
+    function showToast(msg, type = 'success') {
+        const container = document.getElementById('toast-container-i3j4');
+        const t = document.createElement('div');
+        t.className = `toast toast-${type}`;
+        t.textContent = msg;
+        container.appendChild(t);
+        setTimeout(() => { t.style.opacity = '0'; t.style.transition = 'opacity 0.3s'; setTimeout(() => t.remove(), 300); }, 3500);
+    }
+
+    // ─── SEED DATA ───
+    function seedData() {
+        if (getSubmissions().length > 0) return;
+        const now = Date.now();
+        const day = 86400000;
+        const seeds = [
+            { ticket: 'PTW-384721', name: 'Sarah Chen', email: 'sarah.chen@acmetech.com', phone: '+1 (415) 555-0192', company: 'Acme Technologies', subject: 'Unable to access client dashboard', category: 'Technical Support', priority: 'high', message: 'Since yesterday morning, I have been unable to log into the client dashboard. The page loads but shows a blank white screen after entering credentials. I have tried clearing cache and using different browsers (Chrome, Firefox, Edge) with no success. This is blocking our team from accessing critical project data.', status: 'Open', date: new Date(now - 1 * day).toISOString(), aiReply: 'Thank you Sarah, your Technical Support request has been received. Our team will review your issue regarding dashboard access and respond to sarah.chen@acmetech.com within 2 business hours.' },
+            { ticket: 'PTW-529163', name: 'Marcus Johnson', email: 'mjohnson@globalfinance.co', phone: '+1 (212) 555-0347', company: 'Global Finance Corp', subject: 'Invoice discrepancy for Q2 services', category: 'Billing & Accounts', priority: 'medium', message: 'I noticed a discrepancy between our agreed contract rate and the invoice we received for Q2 2026. The invoice shows $12,400 but our contract states $10,800/month. Could you please review and issue a corrected invoice? Our accounts payable team needs this resolved before July 15th.', status: 'In Progress', date: new Date(now - 3 * day).toISOString(), aiReply: 'Thank you Marcus, your Billing & Accounts inquiry has been received. Our finance team will review the invoice discrepancy for Q2 services and respond to mjohnson@globalfinance.co within 2 business hours.' },
+            { ticket: 'PTW-671048', name: 'Emily Rodriguez', email: 'emily.r@startupinc.io', phone: '', company: 'StartupInc', subject: 'Interested in enterprise plan partnership', category: 'Partnership', priority: 'low', message: 'Hi PTW team, we are a growing SaaS startup and would love to explore a potential partnership. We have a user base of 50K+ and think there could be great synergy between our platforms. Would it be possible to schedule a discovery call sometime next week?', status: 'Open', date: new Date(now - 5 * day).toISOString(), aiReply: 'Thank you Emily, your Partnership request has been received. Our business development team will review your inquiry regarding enterprise plan collaboration and respond to emily.r@startupinc.io within 2 business hours.' },
+            { ticket: 'PTW-812395', name: 'David Kim', email: 'dkim@meridianhealth.org', phone: '+1 (310) 555-0821', company: 'Meridian Health', subject: 'Request for dedicated account manager', category: 'New Service Request', priority: 'medium', message: 'As our organization scales usage of PTW services, we would like to request a dedicated account manager. We currently have 3 active projects and expect to add 2 more by Q3. Having a single point of contact would greatly improve our workflow and communication.', status: 'Resolved', date: new Date(now - 6 * day).toISOString(), aiReply: 'Thank you David, your New Service Request has been received. Our account management team will review your request for a dedicated contact and respond to dkim@meridianhealth.org within 2 business hours.' },
+            { ticket: 'PTW-943567', name: 'Lisa Patel', email: 'lpatel@designworks.com', phone: '+1 (650) 555-0634', company: 'DesignWorks Studio', subject: 'Feedback on new reporting UI', category: 'Feedback / Complaint', priority: 'low', message: 'Just wanted to share some feedback on the recently updated reporting interface. The new charts look great, but we noticed the export to PDF feature now cuts off the rightmost column on our monthly reports. Also, it would be helpful to have a dark mode option for the dashboard. Overall, the improvements are appreciated!', status: 'Closed', date: new Date(now - 2 * day).toISOString(), aiReply: 'Thank you Lisa, your Feedback has been received. Our product team will review your comments regarding the reporting UI and respond to lpatel@designworks.com within 2 business hours.' }
+        ];
+        saveSubmissions(seeds);
+    }
+
+    // ─── TABS ───
+    const viewSubmit = document.getElementById('view-submit-a1b2');
+    const viewAdmin = document.getElementById('view-admin-q9r0');
+    const tabSubmitBtn = document.getElementById('tab-submit-d3k1');
+    const tabAdminBtn = document.getElementById('tab-admin-f7j2');
+    const mobSubmitBtn = document.getElementById('mob-tab-submit-m5n6');
+    const mobAdminBtn = document.getElementById('mob-tab-admin-p8q9');
+    const mobileMenu = document.getElementById('mobile-menu-r4t5');
+
+    function switchTab(tab) {
+        if (tab === 'submit') {
+            viewSubmit.classList.remove('hidden'); viewAdmin.classList.add('hidden');
+            tabSubmitBtn.className = tabSubmitBtn.className.replace('tab-inactive', 'tab-active');
+            tabAdminBtn.className = tabAdminBtn.className.replace('tab-active', 'tab-inactive');
+        } else {
+            viewAdmin.classList.remove('hidden'); viewSubmit.classList.add('hidden');
+            tabAdminBtn.className = tabAdminBtn.className.replace('tab-inactive', 'tab-active');
+            tabSubmitBtn.className = tabSubmitBtn.className.replace('tab-active', 'tab-inactive');
+            checkAdminAuth();
+        }
+        viewSubmit.classList.add('fade-in'); viewAdmin.classList.add('fade-in');
+        mobileMenu.classList.add('hidden');
+    }
+
+    tabSubmitBtn.addEventListener('click', () => switchTab('submit'));
+    tabAdminBtn.addEventListener('click', () => switchTab('admin'));
+    mobSubmitBtn.addEventListener('click', () => switchTab('submit'));
+    mobAdminBtn.addEventListener('click', () => switchTab('admin'));
+    document.getElementById('mobile-menu-btn-x9z3').addEventListener('click', () => { mobileMenu.classList.remove('hidden'); reinitIcons(); });
+    document.getElementById('mobile-menu-close-q2w4').addEventListener('click', () => mobileMenu.classList.add('hidden'));
+
+    // ─── FORM LOGIC ───
+    const form = document.getElementById('contact-form-g7h8');
+    const fields = {
+        name: document.getElementById('field-name-i9j0'),
+        email: document.getElementById('field-email-m3n4'),
+        phone: document.getElementById('field-phone-q7r8'),
+        company: document.getElementById('field-company-s9t0'),
+        subject: document.getElementById('field-subject-u1v2'),
+        category: document.getElementById('field-category-y5z6'),
+        message: document.getElementById('field-message-q3r4'),
+    };
+    const submitBtn = document.getElementById('submit-btn-g9h0');
+    const successScreen = document.getElementById('success-screen-i1j2');
+
+    // Draft auto-save
+    function saveDraft() {
+        const draft = {};
+        Object.keys(fields).forEach(k => draft[k] = fields[k].value);
+        const pri = document.querySelector('input[name="priority"]:checked');
+        draft.priority = pri ? pri.value : '';
+        localStorage.setItem(LS_DRAFT, JSON.stringify(draft));
+    }
+    function loadDraft() {
+        try {
+            const d = JSON.parse(localStorage.getItem(LS_DRAFT));
+            if (!d) return;
+            Object.keys(fields).forEach(k => { if (d[k]) fields[k].value = d[k]; });
+            if (d.priority) { const r = document.getElementById('pri-' + (d.priority === 'medium' ? 'med' : d.priority === 'urgent' ? 'urg' : d.priority) + (d.priority === 'low' ? '-e1f2' : d.priority === 'medium' ? '-g3h4' : d.priority === 'high' ? '-i5j6' : '-k7l8')); if (r) r.checked = true; }
+        } catch {}
+    }
+    function clearDraft() {
+        localStorage.removeItem(LS_DRAFT);
+        Object.keys(fields).forEach(k => fields[k].value = '');
+        document.querySelectorAll('input[name="priority"]').forEach(r => r.checked = false);
+        selectedFile = null;
+        document.getElementById('file-preview-y1z2').classList.add('hidden');
+        clearAllErrors();
+        document.getElementById('ai-cat-suggest-c9d0').classList.add('hidden');
+        document.getElementById('ai-pri-suggest-o1p2').classList.add('hidden');
+        showToast('Draft cleared', 'info');
+    }
+
+    Object.values(fields).forEach(f => f.addEventListener('input', saveDraft));
+    document.querySelectorAll('input[name="priority"]').forEach(r => r.addEventListener('change', saveDraft));
+    document.getElementById('clear-draft-e7f8').addEventListener('click', clearDraft);
+
+    // Validation
+    function showError(id, msg) {
+        const el = document.getElementById(id);
+        if (el) el.textContent = msg;
+    }
+    function clearError(id) {
+        const el = document.getElementById(id);
+        if (el) el.textContent = '';
+    }
+    function clearAllErrors() {
+        document.querySelectorAll('.error-msg').forEach(e => e.textContent = '');
+        document.querySelectorAll('.input-error').forEach(e => e.classList.remove('input-error'));
+    }
+
+    function validateForm() {
+        let valid = true;
+        clearAllErrors();
+        if (!fields.name.value.trim()) { showError('err-name-k1l2', 'Name is required'); fields.name.classList.add('input-error'); valid = false; }
+        if (!fields.email.value.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(fields.email.value)) { showError('err-email-o5p6', 'Valid email is required'); fields.email.classList.add('input-error'); valid = false; }
+        if (!fields.subject.value.trim()) { showError('err-subject-w3x4', 'Subject is required'); fields.subject.classList.add('input-error'); valid = false; }
+        if (!fields.category.value) { showError('err-category-a7b8', 'Please select a category'); fields.category.classList.add('input-error'); valid = false; }
+        if (!fields.message.value.trim()) { showError('err-message-s5t6', 'Message is required'); fields.message.classList.add('input-error'); valid = false; }
+        const pri = document.querySelector('input[name="priority"]:checked');
+        if (!pri) { showError('err-priority-m9n0', 'Please select a priority'); valid = false; }
+        return valid;
+    }
+
+    // Blur validation
+    fields.name.addEventListener('blur', () => { if (!fields.name.value.trim()) { showError('err-name-k1l2', 'Name is required'); fields.name.classList.add('input-error'); } else { clearError('err-name-k1l2'); fields.name.classList.remove('input-error'); } });
+    fields.email.addEventListener('blur', () => { if (!fields.email.value.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(fields.email.value)) { showError('err-email-o5p6', 'Valid email is required'); fields.email.classList.add('input-error'); } else { clearError('err-email-o5p6'); fields.email.classList.remove('input-error'); } });
+    fields.subject.addEventListener('blur', () => { if (!fields.subject.value.trim()) { showError('err-subject-w3x4', 'Subject is required'); fields.subject.classList.add('input-error'); } else { clearError('err-subject-w3x4'); fields.subject.classList.remove('input-error'); } });
+    fields.category.addEventListener('change', () => { if (fields.category.value) { clearError('err-category-a7b8'); fields.category.classList.remove('input-error'); } });
+
+    // File upload
+    let selectedFile = null;
+    const dropZone = document.getElementById('drop-zone-u7v8');
+    const fileInput = document.getElementById('file-input-w9x0');
+    const filePreview = document.getElementById('file-preview-y1z2');
+    const fileNameEl = document.getElementById('file-name-a3b4');
+
+    dropZone.addEventListener('click', () => fileInput.click());
+    dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+    dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+    dropZone.addEventListener('drop', (e) => { e.preventDefault(); dropZone.classList.remove('drag-over'); if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]); });
+    fileInput.addEventListener('change', () => { if (fileInput.files.length) handleFile(fileInput.files[0]); });
+    document.getElementById('file-remove-c5d6').addEventListener('click', () => { selectedFile = null; filePreview.classList.add('hidden'); fileInput.value = ''; });
+
+    function handleFile(file) {
+        const allowed = ['application/pdf', 'image/png', 'image/jpeg', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+        if (!allowed.includes(file.type)) { showToast('File type not supported', 'danger'); return; }
+        if (file.size > 10 * 1024 * 1024) { showToast('File exceeds 10 MB limit', 'danger'); return; }
+        selectedFile = file;
+        fileNameEl.textContent = file.name;
+        filePreview.classList.remove('hidden');
+    }
+
+    // ─── AI: Auto-categorize ───
+    let aiCatTimeout = null;
+    fields.message.addEventListener('blur', () => {
+        const msg = fields.message.value.trim();
+        if (msg.length < 20) return;
+        if (aiCatTimeout) clearTimeout(aiCatTimeout);
+        aiCatTimeout = setTimeout(async () => {
+            // Suggest category
+            if (!fields.category.value) {
+                try {
+                    const sugBox = document.getElementById('ai-cat-suggest-c9d0');
+                    if (window.AppSDK && window.AppSDK.ai && window.AppSDK.ai.chat) {
+                        const res = await AppSDK.ai.chat({
+                            messages: [
+                                { role: 'system', content: 'You are a support ticket classifier. Given a user message, classify it into exactly one category from this list: General Inquiry, Technical Support, Billing & Accounts, New Service Request, Partnership, Feedback / Complaint, Other. Reply with ONLY the category name, nothing else.' },
+                                { role: 'user', content: msg }
+                            ]
+                        });
+                        const cat = res.content.trim();
+                        const validCats = ['General Inquiry', 'Technical Support', 'Billing & Accounts', 'New Service Request', 'Partnership', 'Feedback / Complaint', 'Other'];
+                        if (validCats.includes(cat)) {
+                            sugBox.innerHTML = '<span class="inline-flex items-center gap-1 text-xs bg-accent-blue/10 text-accent-blue px-2.5 py-1 rounded-lg cursor-pointer hover:bg-accent-blue/20 transition-colors"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a4 4 0 0 1 4 4c0 1.95-2 3-2 8h-4c0-5-2-6.05-2-8a4 4 0 0 1 4-4z"/><path d="M10 18h4"/><path d="M10 22h4"/></svg> AI suggests: ' + cat + '</span>';
+                            sugBox.classList.remove('hidden');
+                            sugBox.querySelector('span').addEventListener('click', () => { fields.category.value = cat; sugBox.classList.add('hidden'); clearError('err-category-a7b8'); fields.category.classList.remove('input-error'); saveDraft(); });
+                        }
+                    }
+                } catch {}
+            }
+            // Suggest priority
+            const priChecked = document.querySelector('input[name="priority"]:checked');
+            if (!priChecked) {
+                try {
+                    const priBox = document.getElementById('ai-pri-suggest-o1p2');
+                    if (window.AppSDK && window.AppSDK.ai && window.AppSDK.ai.chat) {
+                        const res = await AppSDK.ai.chat({
+                            messages: [
+                                { role: 'system', content: 'You are a support ticket priority classifier. Given a user message, classify the urgency into exactly one: low, medium, high, urgent. Reply with ONLY the priority word in lowercase, nothing else.' },
+                                { role: 'user', content: msg }
+                            ]
+                        });
+                        const pri = res.content.trim().toLowerCase();
+                        if (['low', 'medium', 'high', 'urgent'].includes(pri)) {
+                            const label = PRIORITY_LABELS[pri];
+                            const colors = { low: 'text-success bg-success/10', medium: 'text-warning bg-warning/10', high: 'text-danger bg-danger/10', urgent: 'text-urgent bg-urgent/10' };
+                            priBox.innerHTML = '<span class="inline-flex items-center gap-1 text-xs ' + colors[pri] + ' px-2.5 py-1 rounded-lg cursor-pointer hover:opacity-80 transition-opacity"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a4 4 0 0 1 4 4c0 1.95-2 3-2 8h-4c0-5-2-6.05-2-8a4 4 0 0 1 4-4z"/><path d="M10 18h4"/><path d="M10 22h4"/></svg> AI suggests: ' + label + '</span>';
+                            priBox.classList.remove('hidden');
+                            priBox.querySelector('span').addEventListener('click', () => {
+                                const rId = pri === 'low' ? 'pri-low-e1f2' : pri === 'medium' ? 'pri-med-g3h4' : pri === 'high' ? 'pri-high-i5j6' : 'pri-urg-k7l8';
+                                document.getElementById(rId).checked = true;
+                                priBox.classList.add('hidden');
+                                clearError('err-priority-m9n0');
+                                saveDraft();
+                            });
+                        }
+                    }
+                } catch {}
+            }
+        }, 600);
+    });
+
+    // ─── FORM SUBMIT ───
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        if (!validateForm()) return;
+
+        const pri = document.querySelector('input[name="priority"]:checked');
+        const data = {
+            ticket: genTicket(),
+            name: fields.name.value.trim(),
+            email: fields.email.value.trim(),
+            phone: fields.phone.value.trim(),
+            company: fields.company.value.trim(),
+            subject: fields.subject.value.trim(),
+            category: fields.category.value,
+            priority: pri.value,
+            message: fields.message.value.trim(),
+            fileName: selectedFile ? selectedFile.name : '',
+            status: 'Open',
+            date: new Date().toISOString(),
+            aiReply: ''
+        };
+
+        // Show loading
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<span class="spinner"></span> Processing...';
+
+        // Simulate a short delay then call AI
+        await new Promise(r => setTimeout(r, 1500));
+
+        let aiReply = `Thank you ${data.name}, your ${data.category} request has been received. Our team will review your inquiry regarding "${data.subject}" and respond to ${data.email} within 2 business hours.`;
+        try {
+            if (window.AppSDK && window.AppSDK.ai && window.AppSDK.ai.chat) {
+                const res = await AppSDK.ai.chat({
+                    messages: [
+                        { role: 'system', content: 'You are a polished customer service acknowledgment writer for PTW (admin-ptw.com). Generate a brief, professional, warm acknowledgment message (2-3 sentences max) for a support ticket submission. Include the person\'s name, reference their subject/category, mention their email for follow-up, and note the 2 business hour response time. Do not use markdown formatting. Be concise and professional.' },
+                        { role: 'user', content: `Name: ${data.name}\nEmail: ${data.email}\nCategory: ${data.category}\nPriority: ${data.priority}\nSubject: ${data.subject}\nMessage summary: ${data.message.substring(0, 300)}` }
+                    ]
+                });
+                if (res.content && res.content.trim().length > 10) aiReply = res.content.trim();
+            }
+        } catch {}
+
+        data.aiReply = aiReply;
+
+        // Save
+        const subs = getSubmissions();
+        subs.unshift(data);
+        saveSubmissions(subs);
+        localStorage.removeItem(LS_DRAFT);
+
+        // Show success
+        form.classList.add('hidden');
+        successScreen.classList.remove('hidden');
+        document.getElementById('ticket-number-k3l4').textContent = data.ticket;
+        document.getElementById('ai-reply-m5n6').textContent = aiReply;
+
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<i data-lucide="send" class="w-4 h-4"></i> Submit Request';
+        reinitIcons();
+    });
+
+    // Submit another
+    document.getElementById('submit-another-o7p8').addEventListener('click', () => {
+        successScreen.classList.add('hidden');
+        form.classList.remove('hidden');
+        Object.keys(fields).forEach(k => fields[k].value = '');
+        document.querySelectorAll('input[name="priority"]').forEach(r => r.checked = false);
+        selectedFile = null;
+        filePreview.classList.add('hidden');
+        fileInput.value = '';
+        clearAllErrors();
+        document.getElementById('ai-cat-suggest-c9d0').classList.add('hidden');
+        document.getElementById('ai-pri-suggest-o1p2').classList.add('hidden');
+        reinitIcons();
+    });
+
+    // ─── ADMIN VIEW ───
+    function checkAdminAuth() {
+        const gate = document.getElementById('admin-gate-s1t2');
+        const dash = document.getElementById('admin-dashboard-a9b0');
+        if (sessionStorage.getItem(SS_AUTH) === 'true') {
+            gate.classList.add('hidden');
+            dash.classList.remove('hidden');
+            renderAdmin();
+        } else {
+            gate.classList.remove('hidden');
+            dash.classList.add('hidden');
+        }
+    }
+
+    document.getElementById('admin-login-y7z8').addEventListener('click', () => {
+        const passInput = document.getElementById('admin-pass-u3v4');
+        if (passInput.value === ADMIN_PASS) {
+            sessionStorage.setItem(SS_AUTH, 'true');
+            checkAdminAuth();
+        } else {
+            document.getElementById('admin-pass-err-w5x6').textContent = 'Incorrect password. Please try again.';
+            passInput.classList.add('input-error');
+        }
+    });
+    document.getElementById('admin-pass-u3v4').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') document.getElementById('admin-login-y7z8').click();
+    });
+    document.getElementById('admin-logout-e3f4').addEventListener('click', () => {
+        sessionStorage.removeItem(SS_AUTH);
+        document.getElementById('admin-pass-u3v4').value = '';
+        document.getElementById('admin-pass-err-w5x6').textContent = '';
+        document.getElementById('admin-pass-u3v4').classList.remove('input-error');
+        checkAdminAuth();
+        showToast('Dashboard locked', 'info');
+    });
+
+    // ─── ADMIN TABLE ───
+    let sortCol = 'date', sortDir = 'desc';
+
+    function renderAdmin() {
+        const subs = getFilteredSubmissions();
+        renderStats();
+        renderTable(subs);
+    }
+
+    function getFilteredSubmissions() {
+        let subs = getSubmissions();
+        const search = document.getElementById('filter-search-q5r6').value.toLowerCase();
+        const cat = document.getElementById('filter-category-s7t8').value;
+        const pri = document.getElementById('filter-priority-u9v0').value;
+        const status = document.getElementById('filter-status-w1x2').value;
+
+        if (search) subs = subs.filter(s => (s.name + ' ' + s.email + ' ' + s.subject + ' ' + s.ticket + ' ' + s.message).toLowerCase().includes(search));
+        if (cat) subs = subs.filter(s => s.category === cat);
+        if (pri) subs = subs.filter(s => s.priority === pri);
+        if (status) subs = subs.filter(s => s.status === status);
+
+        // Sort
+        subs.sort((a, b) => {
+            let valA, valB;
+            switch (sortCol) {
+                case 'index': valA = getSubmissions().indexOf(a); valB = getSubmissions().indexOf(b); break;
+                case 'ticket': valA = a.ticket; valB = b.ticket; break;
+                case 'name': valA = a.name.toLowerCase(); valB = b.name.toLowerCase(); break;
+                case 'email': valA = a.email.toLowerCase(); valB = b.email.toLowerCase(); break;
+                case 'category': valA = a.category; valB = b.category; break;
+                case 'priority': valA = PRIORITY_ORDER[a.priority] || 0; valB = PRIORITY_ORDER[b.priority] || 0; break;
+                case 'subject': valA = a.subject.toLowerCase(); valB = b.subject.toLowerCase(); break;
+                case 'date': valA = new Date(a.date).getTime(); valB = new Date(b.date).getTime(); break;
+                default: valA = 0; valB = 0;
+            }
+            if (valA < valB) return sortDir === 'asc' ? -1 : 1;
+            if (valA > valB) return sortDir === 'asc' ? 1 : -1;
+            return 0;
+        });
+
+        return subs;
+    }
+
+    function renderStats() {
+        const all = getSubmissions();
+        document.getElementById('stat-total-i7j8').textContent = all.length;
+        document.getElementById('stat-open-k9l0').textContent = all.filter(s => s.status === 'Open' || s.status === 'In Progress').length;
+
+        // Avg priority
+        if (all.length) {
+            const avg = all.reduce((sum, s) => sum + (PRIORITY_ORDER[s.priority] || 1), 0) / all.length;
+            const label = avg < 1.5 ? 'Low' : avg < 2.5 ? 'Medium' : avg < 3.5 ? 'High' : 'Urgent';
+            document.getElementById('stat-priority-m1n2').textContent = label;
+        } else {
+            document.getElementById('stat-priority-m1n2').textContent = '—';
+        }
+
+        // Today
+        const todayStr = new Date().toDateString();
+        document.getElementById('stat-today-o3p4').textContent = all.filter(s => new Date(s.date).toDateString() === todayStr).length;
+    }
+
+    function renderTable(subs) {
+        const tbody = document.getElementById('admin-table-body-y3z4');
+        const emptyState = document.getElementById('empty-state-a5b6');
+
+        if (subs.length === 0) {
+            tbody.innerHTML = '';
+            emptyState.classList.remove('hidden');
+            return;
+        }
+        emptyState.classList.add('hidden');
+
+        const allSubs = getSubmissions();
+        tbody.innerHTML = subs.map((s, i) => {
+            const idx = allSubs.findIndex(x => x.ticket === s.ticket) + 1;
+            const priBadge = `<span class="badge badge-${s.priority}">${PRIORITY_LABELS[s.priority] || s.priority}</span>`;
+            const statusCls = s.status === 'Open' ? 'open' : s.status === 'In Progress' ? 'inprogress' : s.status === 'Resolved' ? 'resolved' : 'closed';
+            return `<tr class="table-row">
+                <td class="px-4 py-3 text-txt-muted tabular-nums">${idx}</td>
+                <td class="px-4 py-3 font-mono text-xs text-accent-cyan">${s.ticket}</td>
+                <td class="px-4 py-3 font-medium text-white whitespace-nowrap">${s.name}</td>
+                <td class="px-4 py-3 text-txt-muted hidden lg:table-cell">${s.email}</td>
+                <td class="px-4 py-3"><span class="text-xs text-txt-muted">${s.category}</span></td>
+                <td class="px-4 py-3">${priBadge}</td>
+                <td class="px-4 py-3 hidden md:table-cell max-w-[200px] truncate text-txt-muted">${s.subject}</td>
+                <td class="px-4 py-3 hidden xl:table-cell text-txt-muted text-xs tabular-nums whitespace-nowrap">${fmtDate(s.date)}</td>
+                <td class="px-4 py-3">
+                    <select class="status-select bg-transparent border border-border rounded-lg text-xs px-2 py-1.5 text-txt-primary focus:border-accent-blue focus:outline-none" data-ticket="${s.ticket}">
+                        <option value="Open" ${s.status === 'Open' ? 'selected' : ''}>Open</option>
+                        <option value="In Progress" ${s.status === 'In Progress' ? 'selected' : ''}>In Progress</option>
+                        <option value="Resolved" ${s.status === 'Resolved' ? 'selected' : ''}>Resolved</option>
+                        <option value="Closed" ${s.status === 'Closed' ? 'selected' : ''}>Closed</option>
+                    </select>
+                </td>
+                <td class="px-4 py-3 text-right whitespace-nowrap">
+                    <button class="action-view text-accent-blue hover:text-blue-300 p-1.5 transition-colors" data-ticket="${s.ticket}" title="View"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg></button>
+                    <button class="action-resolve text-success hover:text-green-300 p-1.5 transition-colors" data-ticket="${s.ticket}" title="Resolve"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></button>
+                    <button class="action-delete text-danger hover:text-red-300 p-1.5 transition-colors" data-ticket="${s.ticket}" title="Delete"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg></button>
+                </td>
+            </tr>`;
+        }).join('');
+
+        // Attach events
+        tbody.querySelectorAll('.status-select').forEach(sel => {
+            sel.addEventListener('change', () => {
+                const subs = getSubmissions();
+                const idx = subs.findIndex(s => s.ticket === sel.dataset.ticket);
+                if (idx > -1) { subs[idx].status = sel.value; saveSubmissions(subs); renderStats(); showToast(`Status updated to ${sel.value}`, 'info'); }
+            });
+        });
+        tbody.querySelectorAll('.action-view').forEach(btn => {
+            btn.addEventListener('click', () => openDetailModal(btn.dataset.ticket));
+        });
+        tbody.querySelectorAll('.action-resolve').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const subs = getSubmissions();
+                const idx = subs.findIndex(s => s.ticket === btn.dataset.ticket);
+                if (idx > -1) { subs[idx].status = 'Resolved'; saveSubmissions(subs); renderAdmin(); showToast('Marked as resolved', 'success'); }
+            });
+        });
+        tbody.querySelectorAll('.action-delete').forEach(btn => {
+            btn.addEventListener('click', () => {
+                if (!confirm('Delete this submission? This cannot be undone.')) return;
+                const subs = getSubmissions();
+                const idx = subs.findIndex(s => s.ticket === btn.dataset.ticket);
+                if (idx > -1) { subs.splice(idx, 1); saveSubmissions(subs); renderAdmin(); showToast('Submission deleted', 'danger'); }
+            });
+        });
+    }
+
+    // Sort headers
+    document.querySelectorAll('th[data-sort]').forEach(th => {
+        th.addEventListener('click', () => {
+            const col = th.dataset.sort;
+            if (sortCol === col) { sortDir = sortDir === 'asc' ? 'desc' : 'asc'; } else { sortCol = col; sortDir = 'asc'; }
+            renderAdmin();
+        });
+    });
+
+    // Filters
+    ['filter-search-q5r6', 'filter-category-s7t8', 'filter-priority-u9v0', 'filter-status-w1x2'].forEach(id => {
+        document.getElementById(id).addEventListener('input', renderAdmin);
+        document.getElementById(id).addEventListener('change', renderAdmin);
+    });
+
+    // Detail modal
+    function openDetailModal(ticket) {
+        const subs = getSubmissions();
+        const s = subs.find(x => x.ticket === ticket);
+        if (!s) return;
+        const modal = document.getElementById('detail-modal-c7d8');
+        const body = document.getElementById('modal-body-g1h2');
+
+        const priBadge = `<span class="badge badge-${s.priority}">${PRIORITY_LABELS[s.priority]}</span>`;
+        const statusCls = s.status === 'Open' ? 'open' : s.status === 'In Progress' ? 'inprogress' : s.status === 'Resolved' ? 'resolved' : 'closed';
+        const statusBadge = `<span class="badge badge-${statusCls}">${s.status}</span>`;
+
+        body.innerHTML = `
+            <div class="flex items-center gap-2 mb-1"><span class="font-mono text-accent-cyan text-sm font-bold">${s.ticket}</span> ${priBadge} ${statusBadge}</div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div><label class="text-xs text-txt-muted uppercase tracking-wide">Name</label><p class="text-sm font-medium text-white">${s.name}</p></div>
+                <div><label class="text-xs text-txt-muted uppercase tracking-wide">Email</label><p class="text-sm text-white">${s.email}</p></div>
+                <div><label class="text-xs text-txt-muted uppercase tracking-wide">Phone</label><p class="text-sm text-white">${s.phone || '—'}</p></div>
+                <div><label class="text-xs text-txt-muted uppercase tracking-wide">Company</label><p class="text-sm text-white">${s.company || '—'}</p></div>
+                <div><label class="text-xs text-txt-muted uppercase tracking-wide">Category</label><p class="text-sm text-white">${s.category}</p></div>
+                <div><label class="text-xs text-txt-muted uppercase tracking-wide">Date</label><p class="text-sm text-white">${fmtDateTime(s.date)}</p></div>
+            </div>
+            <div><label class="text-xs text-txt-muted uppercase tracking-wide">Subject</label><p class="text-sm font-medium text-white">${s.subject}</p></div>
+            <div><label class="text-xs text-txt-muted uppercase tracking-wide">Message</label><p class="text-sm text-txt-primary/85 bg-navy rounded-lg p-3 border border-border leading-relaxed">${s.message}</p></div>
+            ${s.fileName ? `<div><label class="text-xs text-txt-muted uppercase tracking-wide">Attachment</label><p class="text-sm text-accent-blue flex items-center gap-1"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg> ${s.fileName}</p></div>` : ''}
+            <div class="border-t border-border pt-3 mt-1"><label class="text-xs text-txt-muted uppercase tracking-wide">AI Acknowledgment Sent</label><p class="text-sm text-success/80 bg-success/5 rounded-lg p-3 border border-success/10 leading-relaxed mt-1">${s.aiReply || 'No AI reply generated.'}</p></div>
+        `;
+        modal.classList.remove('hidden');
+    }
+
+    document.getElementById('modal-close-e9f0').addEventListener('click', () => document.getElementById('detail-modal-c7d8').classList.add('hidden'));
+    document.getElementById('detail-modal-c7d8').addEventListener('click', (e) => { if (e.target.id === 'detail-modal-c7d8') document.getElementById('detail-modal-c7d8').classList.add('hidden'); });
+
+    // Export CSV
+    document.getElementById('export-csv-c1d2').addEventListener('click', () => {
+        const subs = getSubmissions();
+        if (!subs.length) { showToast('No submissions to export', 'warning'); return; }
+        const headers = ['Ticket', 'Name', 'Email', 'Phone', 'Company', 'Subject', 'Category', 'Priority', 'Status', 'Date', 'Message'];
+        const escape = (v) => '"' + String(v || '').replace(/"/g, '""') + '"';
+        const rows = subs.map(s => [s.ticket, s.name, s.email, s.phone, s.company, s.subject, s.category, s.priority, s.status, s.date, s.message].map(escape).join(','));
+        const csv = [headers.join(','), ...rows].join('\n');
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url; a.download = 'ptw-submissions-' + new Date().toISOString().slice(0, 10) + '.csv';
+        document.body.appendChild(a); a.click(); document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        showToast('CSV exported successfully', 'success');
+    });
+
+    // ─── INIT ───
+    function reinitIcons() {
+        if (typeof lucide !== 'undefined' && typeof lucide.createIcons === 'function') { lucide.createIcons(); }
+    }
+
+    if (typeof lucide !== 'undefined' && typeof lucide.createIcons === 'function') {
+        lucide.createIcons();
+    }
+
+    seedData();
+    loadDraft();
+    </script>
+</body>
 </html>
