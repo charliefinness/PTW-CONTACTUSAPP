@@ -39,15 +39,6 @@ const SERVICE_CATEGORIES: ServiceCategory[] = [
     services: ['Food Assistance', 'Clothing Assistance', 'General Community Help'],
   },
   {
-    name: 'Special Programs',
-    services: [
-      'Justice-Impacted Women',
-      'Foster / Transition-Age Youth',
-      'DOR Employment Services',
-      'Employed Client Emergency Help',
-    ],
-  },
-  {
     name: 'Intake / Routing',
     services: ['Not Sure — Need Guidance', 'Referred by Another Agency'],
   },
