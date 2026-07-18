@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ChevronDown, ChevronUp } from 'lucide-react';
+import { ChevronDown, ChevronUp, X } from 'lucide-react';
 
 type ServiceCategory = {
   name: string;
@@ -300,28 +300,9 @@ export default function ContactForm() {
         </div>
 
         <div>
-          <div className="flex items-center justify-between mb-3">
-            <label className="block text-sm font-semibold text-gray-700">
-              What Services Are You Looking For? *
-            </label>
-            {selectedInterests.length > 0 && (
-              <div className="flex items-center gap-3">
-                <span className="text-sm text-orange-600 font-medium">
-                  {selectedInterests.length} selected
-                </span>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setSelectedInterests([]);
-                    setValidationError('');
-                  }}
-                  className="text-sm text-gray-500 hover:text-red-600 font-medium underline underline-offset-2 transition-colors"
-                >
-                  Clear All
-                </button>
-              </div>
-            )}
-          </div>
+          <label className="block text-sm font-semibold text-gray-700 mb-3">
+            What Services Are You Looking For? *
+          </label>
 
           {validationError && (
             <div className="mb-3 p-3 bg-red-50 border border-red-200 rounded-lg">
@@ -330,10 +311,50 @@ export default function ContactForm() {
           )}
 
           <div className="space-y-3 border border-gray-300 rounded-lg p-4 max-h-96 overflow-y-auto">
+            {selectedInterests.length > 0 && (
+              <div className="pb-3 mb-1 border-b border-gray-200">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                    Selected ({selectedInterests.length})
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSelectedInterests([]);
+                      setValidationError('');
+                    }}
+                    className="text-xs text-gray-500 hover:text-red-600 font-medium underline underline-offset-2 transition-colors"
+                  >
+                    Clear All
+                  </button>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {selectedInterests.map((service) => (
+                    <span
+                      key={service}
+                      className="inline-flex items-center gap-1.5 pl-2.5 pr-1.5 py-1 bg-gradient-to-r from-orange-100 to-yellow-100 text-orange-800 text-xs font-medium rounded-full border border-orange-200"
+                    >
+                      {service}
+                      <button
+                        type="button"
+                        onClick={() => toggleService(service)}
+                        className="text-orange-500 hover:text-red-600 transition-colors flex items-center"
+                        aria-label={`Remove ${service}`}
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
             {SERVICE_CATEGORIES.map((category) => {
               const isExpanded = expandedCategories.includes(category.name);
               const isFullySelected = isCategoryFullySelected(category);
               const isPartiallySelected = isCategoryPartiallySelected(category);
+              const availableServices = category.services.filter(
+                (s) => !selectedInterests.includes(s)
+              );
 
               return (
                 <div key={category.name} className="border border-gray-200 rounded-lg overflow-hidden">
@@ -375,20 +396,26 @@ export default function ContactForm() {
 
                   {isExpanded && (
                     <div className="p-3 space-y-2 bg-white">
-                      {category.services.map((service) => (
-                        <label
-                          key={service}
-                          className="flex items-center gap-3 p-2 rounded hover:bg-gray-50 cursor-pointer transition-colors"
-                        >
-                          <input
-                            type="checkbox"
-                            checked={selectedInterests.includes(service)}
-                            onChange={() => toggleService(service)}
-                            className="w-4 h-4 text-orange-500 border-gray-300 rounded focus:ring-orange-400"
-                          />
-                          <span className="text-sm text-gray-700">{service}</span>
-                        </label>
-                      ))}
+                      {availableServices.length === 0 ? (
+                        <p className="text-sm text-gray-400 italic p-2">
+                          All services in this category have been selected
+                        </p>
+                      ) : (
+                        availableServices.map((service) => (
+                          <label
+                            key={service}
+                            className="flex items-center gap-3 p-2 rounded hover:bg-gray-50 cursor-pointer transition-colors"
+                          >
+                            <input
+                              type="checkbox"
+                              checked={false}
+                              onChange={() => toggleService(service)}
+                              className="w-4 h-4 text-orange-500 border-gray-300 rounded focus:ring-orange-400"
+                            />
+                            <span className="text-sm text-gray-700">{service}</span>
+                          </label>
+                        ))
+                      )}
                     </div>
                   )}
                 </div>
