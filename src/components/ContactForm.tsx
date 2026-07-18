@@ -305,9 +305,21 @@ export default function ContactForm() {
               What Services Are You Looking For? *
             </label>
             {selectedInterests.length > 0 && (
-              <span className="text-sm text-orange-600 font-medium">
-                {selectedInterests.length} selected
-              </span>
+              <div className="flex items-center gap-3">
+                <span className="text-sm text-orange-600 font-medium">
+                  {selectedInterests.length} selected
+                </span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedInterests([]);
+                    setValidationError('');
+                  }}
+                  className="text-sm text-gray-500 hover:text-red-600 font-medium underline underline-offset-2 transition-colors"
+                >
+                  Clear All
+                </button>
+              </div>
             )}
           </div>
 
