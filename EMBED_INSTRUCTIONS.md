@@ -4,7 +4,7 @@
 
 This contact form sends submissions directly via email without storing any data in a database. When someone submits the form, it:
 1. Validates the input
-2. Sends an email notification to **intrest@pavingthewayfd.com**
+2. Sends an email notification to **support@pavingthewayfd.org**
 3. Shows a success message to the user
 
 ## Embedding in Canva
