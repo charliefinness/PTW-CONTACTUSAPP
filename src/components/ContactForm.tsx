@@ -192,6 +192,26 @@ export default function ContactForm() {
     );
   };
 
+  const fillTestData = () => {
+    setFormData({
+      first_name: 'Jordan',
+      last_name: 'Ellis',
+      email: 'jordan.ellis@example.com',
+      phone: '(555) 246-8135',
+      message:
+        "I'm reaching out for help with job training and immediate housing support. Looking forward to connecting with your team.",
+      honeypot: '',
+    });
+    setSelectedInterests([
+      'Job Training / Certifications',
+      'Eviction Help / Tenant Rights',
+      'Food Assistance',
+    ]);
+    setExpandedCategories(['Employment & Training', 'Housing & Stability', 'Basic Needs']);
+    setValidationError('');
+    setSubmitStatus('idle');
+  };
+
   return (
     <div className="w-full max-w-3xl mx-auto p-8 bg-white rounded-2xl shadow-xl">
       <div className="text-center mb-8">
@@ -447,13 +467,22 @@ export default function ContactForm() {
           </p>
         </div>
 
-        <button
-          type="submit"
-          disabled={isSubmitting}
-          className="w-full bg-gradient-to-r from-yellow-500 via-orange-500 to-orange-600 hover:from-yellow-600 hover:via-orange-600 hover:to-orange-700 text-white font-bold py-4 px-6 rounded-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl transform hover:scale-[1.02]"
-        >
-          {isSubmitting ? 'Sending...' : 'Submit'}
-        </button>
+        <div className="flex gap-3">
+          <button
+            type="button"
+            onClick={fillTestData}
+            className="px-5 py-4 rounded-lg border-2 border-dashed border-orange-300 bg-orange-50 text-orange-700 font-semibold text-sm hover:bg-orange-100 hover:border-orange-400 transition-all duration-200 whitespace-nowrap"
+          >
+            Fill Test Data
+          </button>
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            className="flex-1 bg-gradient-to-r from-yellow-500 via-orange-500 to-orange-600 hover:from-yellow-600 hover:via-orange-600 hover:to-orange-700 text-white font-bold py-4 px-6 rounded-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl transform hover:scale-[1.02]"
+          >
+            {isSubmitting ? 'Sending...' : 'Submit'}
+          </button>
+        </div>
       </form>
     </div>
   );

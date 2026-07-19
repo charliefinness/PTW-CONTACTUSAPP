@@ -386,6 +386,24 @@
 
     .submit-btn:disabled { opacity: 0.55; cursor: not-allowed; transform: none; }
 
+    .btn-row { display: flex; gap: 0.75rem; align-items: stretch; }
+
+    .test-data-btn {
+      padding: 1rem 1.25rem;
+      border: 2px dashed #fed7aa;
+      border-radius: 0.6rem;
+      background: #fff7ed;
+      color: #c2410c;
+      font-size: 0.875rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s;
+      white-space: nowrap;
+      font-family: inherit;
+    }
+
+    .test-data-btn:hover { background: #ffedd5; border-color: #fdba74; }
+
     .honeypot { position: absolute; left: -9999px; width: 0; height: 0; opacity: 0; }
   </style>
 </head>
@@ -453,7 +471,10 @@
         By submitting this form, you agree to our collection and use of your personal information as described in our privacy policy. We will only use your information to respond to your inquiry and provide the services you requested.
       </p>
 
-      <button type="submit" class="submit-btn" id="submit-btn">Submit</button>
+      <div class="btn-row">
+        <button type="button" class="test-data-btn" id="test-data-btn">Fill Test Data</button>
+        <button type="submit" class="submit-btn" id="submit-btn">Submit</button>
+      </div>
     </form>
   </div>
 
@@ -664,6 +685,29 @@
         updateCategoryUI(catEl, category);
       });
     }
+
+    function fillTestData() {
+      document.getElementById('first_name').value = 'Jordan';
+      document.getElementById('last_name').value = 'Ellis';
+      document.getElementById('email').value = 'jordan.ellis@example.com';
+      document.getElementById('phone').value = '(555) 246-8135';
+      document.getElementById('message').value = "I'm reaching out for help with job training and immediate housing support. Looking forward to connecting with your team.";
+      document.getElementById('honeypot').value = '';
+      selectedInterests = ['Job Training / Certifications', 'Eviction Help / Tenant Rights', 'Food Assistance'];
+      document.getElementById('validation-error').classList.remove('show');
+      document.getElementById('alert-success').classList.remove('show');
+      document.getElementById('alert-error').classList.remove('show');
+      updateSelectedSection();
+      document.querySelectorAll('.category').forEach((catEl, i) => {
+        updateCategoryUI(catEl, SERVICE_CATEGORIES[i]);
+        if (catEl.classList.contains('open')) {
+          rebuildCategoryServices(catEl, SERVICE_CATEGORIES[i]);
+        }
+      });
+      postHeight();
+    }
+
+    document.getElementById('test-data-btn').addEventListener('click', fillTestData);
 
     document.getElementById('clear-all-btn').addEventListener('click', () => {
       selectedInterests = [];
