@@ -1,85 +1,105 @@
-# Embedding the Contact Form in Canva Website
+# Embedding the Contact Form in a Canva Website Page
 
-## How It Works
+## What you're embedding
 
-This contact form sends submissions directly via email without storing any data in a database. When someone submits the form, it:
-1. Validates the input
-2. Sends an email notification to **support@pavingthewayfd.org**
-3. Shows a success message to the user
+A standalone, self-contained contact form at **`/form.html`**.
 
-## Embedding in Canva
+- No external CSS or JS files to load — everything is inline, so it works inside Canva's iframe embed block without dependency or CORS issues.
+- Transparent background — blends into any Canva page background.
+- Auto-resizing — the iframe grows/shrinks to fit the form exactly, so there's never a scrollbar or empty space (no need to guess a pixel height).
+- Sends submissions to **support@pavingthewayfd.org** via the Supabase edge function.
 
-### Step 1: Deploy Your Form
+## Step 1 — Deploy
 
-First, make sure your form is deployed and accessible at a public URL. You'll need this URL for embedding.
+Deploy this project (Bolt's Deploy button). Note the deployed URL, e.g.
 
-### Step 2: Add to Canva Website
-
-1. In your Canva website editor, go to the page where you want to add the contact form
-2. Click on "Apps" or "Elements" in the left sidebar
-3. Search for "Embed" or "HTML embed"
-4. Add the embed element to your page
-5. Use this embed code:
-
-```html
-<iframe
-  src="https://[YOUR-DEPLOYMENT-URL]/"
-  width="100%"
-  height="1200"
-  frameborder="0"
-  style="border: none; max-width: 900px; margin: 0 auto; display: block;"
-  title="Contact Form"
-></iframe>
+```
+https://your-project.bolt.new
 ```
 
-Replace `[YOUR-DEPLOYMENT-URL]` with your actual deployed application URL.
+The form will be available at:
 
-### Step 3: Adjust Height (Optional)
+```
+https://your-project.bolt.new/form.html
+```
 
-If the form appears cut off or has too much white space:
-- Adjust the `height="1200"` value in the iframe code
-- Recommended heights:
-  - Desktop: 1200px
-  - Tablet: 1300px
-  - Mobile: 1400px
+(Test it in a browser first — you should see the form load with the logo, fields, and collapsible service categories.)
 
-## Alternative: Direct Link
+## Step 2 — Add to Canva
 
-If Canva doesn't support iframe embedding on your plan, you can:
-1. Create a button in Canva
-2. Link the button to your deployed form URL
-3. The form will open in a new tab/window
+1. Open your Canva website in the editor.
+2. Go to the page where you want the contact form.
+3. In the left sidebar, click **Apps** → search **Embed** → add the **HTML embed** / **Embed** app.
+4. Click the embed element on the page → choose **"Enter a URL"** (or paste embed code, depending on your Canva plan).
+5. Paste this URL:
 
-## Features
+   ```
+   https://your-project.bolt.new/form.html
+   ```
 
-### Security
-- XSS protection with input sanitization
-- Rate limiting (3 submissions per minute per IP)
-- Honeypot spam prevention
-- Server-side validation
+   …or if your Canva plan requires the iframe code snippet, paste this:
 
-### Design
-- Fully responsive (mobile, tablet, desktop)
-- Matches Paving The Way branding
-- Clean, professional appearance
-- Smooth animations and interactions
+   ```html
+   <iframe
+     src="https://your-project.bolt.new/form.html"
+     width="100%"
+     style="border:0;width:100%;max-width:720px;margin:0 auto;display:block;"
+     title="Contact Paving The Way Foundation"
+     loading="lazy"
+     allow="clipboard-write"
+   ></iframe>
+   <script>
+   (function(){
+     function autoSize(frame){
+       try {
+         var doc = frame.contentDocument || frame.contentWindow.document;
+         if (doc && doc.body) frame.style.height = doc.body.scrollHeight + 'px';
+       } catch(e) {}
+     }
+     var frames = document.querySelectorAll('iframe[src*="form.html"]');
+     frames.forEach(function(frame){
+       frame.addEventListener('load', function(){ autoSize(frame); });
+       autoSize(frame);
+     });
+   })();
+   </script>
+   ```
 
-### Email Notifications
-- Submissions are sent to: **support@pavingthewayfd.org**
-- Professional HTML email format
-- Includes all form details and selected services
+6. Resize the embed block on the Canva canvas to your desired width (recommended: full column width, roughly 720px). The height auto-adjusts.
 
-## Configuration Required
+## Step 3 — Preview & publish
 
-Make sure the following environment variables are set:
-- `VITE_SUPABASE_URL` - Your Supabase project URL (for the email edge function)
-- `VITE_SUPABASE_ANON_KEY` - Your Supabase anonymous key
-- `RESEND_API_KEY` - Your Resend API key (configured in Supabase Edge Functions secrets)
+1. Click **Preview** in Canva to test the form.
+2. Submit a test entry and confirm the email arrives at **support@pavingthewayfd.org**.
+3. Publish your Canva site.
 
-## Testing
+## How auto-resize works
 
-Before embedding in Canva:
-1. Test the form by submitting a test entry
-2. Verify you receive the email at support@pavingthewayfd.org
-3. Check that the form displays correctly on different screen sizes
-4. Confirm all service categories expand and collapse properly
+`form.html` posts a message to its parent window whenever its height changes (initial load, expanding/collapsing a category, selecting services, showing a success/error message). The snippet above listens for the iframe's `load` event and sizes it to the content. If Canva strips the `<script>` tag, the form still works — you'll just see the fixed height instead of auto-resize, and you can switch to the URL-only embed method.
+
+## Form features
+
+- **Chip-based service selection** — selected services leave the category list and appear as removable chips at the top, with a **Clear All** link.
+- **Collapsible categories** with **Select All / Deselect All** per group.
+- **Validation** — required fields + at least one service; inline error messages.
+- **Security** — honeypot spam trap, server-side validation, rate limiting (3 submissions/min/IP), XSS-sanitized inputs.
+- **Responsive** — adapts cleanly to mobile, tablet, and desktop column widths.
+- **Branded** — PTW logo, gradient "Contact Us" heading matching the foundation's palette.
+
+## Required environment variables
+
+Already configured in this project's `.env` — no action needed unless you redeploy elsewhere:
+
+- `VITE_SUPABASE_URL`
+- `VITE_SUPABASE_ANON_KEY`
+- `RESEND_API_KEY` (stored as a Supabase Edge Function secret)
+
+## Troubleshooting
+
+| Symptom | Fix |
+|---|---|
+| Form doesn't appear in Canva | Use the URL method (`/form.html`), not the project root. |
+| Submit button does nothing | Check browser console — the deployed URL must be HTTPS and reachable. |
+| No email arrives | Confirm `RESEND_API_KEY` is set in Supabase Edge Function secrets. |
+| Form is cut off | Widen the embed block in Canva; the script auto-sizes height. |
+| Background doesn't match | `form.html` uses a transparent background — it inherits your Canva page color. |
