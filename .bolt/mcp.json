@@ -1,0 +1,7 @@
+{
+  "mcpServers": {
+    "bolt_mcp": {
+      "enabled": true
+    }
+  }
+}
