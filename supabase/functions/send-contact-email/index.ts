@@ -1,9 +1,11 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
+import { createClient } from "npm:@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Client-Info, Apikey",
+  "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+  "Access-Control-Allow-Headers":
+    "Content-Type, Authorization, X-Client-Info, Apikey",
 };
 
 interface ContactData {
@@ -16,7 +18,6 @@ interface ContactData {
   honeypot?: string;
 }
 
-// Sanitize text to prevent XSS attacks
 function sanitizeText(text: string): string {
   return text
     .replace(/&/g, "&amp;")
@@ -26,31 +27,27 @@ function sanitizeText(text: string): string {
     .replace(/'/g, "&#039;");
 }
 
-// Validate email format
 function isValidEmail(email: string): boolean {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return emailRegex.test(email) && email.length <= 254;
 }
 
-// Validate phone format (flexible international format)
 function isValidPhone(phone: string): boolean {
   const phoneRegex = /^[\d\s\-\+\(\)\.]+$/;
   return phoneRegex.test(phone) && phone.length >= 10 && phone.length <= 20;
 }
 
-// Validate and sanitize contact data
-function validateContactData(data: ContactData): { valid: boolean; error?: string } {
-  // Check honeypot (spam trap)
+function validateContactData(
+  data: ContactData
+): { valid: boolean; error?: string } {
   if (data.honeypot) {
     return { valid: false, error: "Invalid submission" };
   }
 
-  // Validate required fields
   if (!data.first_name || !data.last_name || !data.email || !data.interests) {
     return { valid: false, error: "Missing required fields" };
   }
 
-  // Validate field lengths
   if (data.first_name.length > 100 || data.last_name.length > 100) {
     return { valid: false, error: "Name fields too long" };
   }
@@ -80,7 +77,10 @@ function validateContactData(data: ContactData): { valid: boolean; error?: strin
 
 function generateHTMLEmail(data: ContactData): string {
   const interestsHTML = data.interests
-    .map((interest) => `<li style="margin: 4px 0;">${sanitizeText(interest)}</li>`)
+    .map(
+      (interest) =>
+        `<li style="margin: 4px 0;">${sanitizeText(interest)}</li>`
+    )
     .join("");
 
   return `
@@ -160,7 +160,9 @@ function generateHTMLEmail(data: ContactData): string {
 }
 
 function generatePlainTextEmail(data: ContactData): string {
-  const interestsText = data.interests.map((interest) => `  - ${interest}`).join("\n");
+  const interestsText = data.interests
+    .map((interest) => `  - ${interest}`)
+    .join("\n");
 
   return `
 NEW SUPPORT SERVICES REQUEST
@@ -180,152 +182,105 @@ This request was submitted through pavingthewayfd.com
   `.trim();
 }
 
-// Rate limiting store (in-memory)
-const rateLimitStore = new Map<string, { count: number; resetTime: number }>();
-const RATE_LIMIT_WINDOW = 60000; // 1 minute
-const RATE_LIMIT_MAX = 3; // 3 submissions per minute per IP
-
-function checkRateLimit(ip: string): { allowed: boolean; error?: string } {
-  const now = Date.now();
-  const record = rateLimitStore.get(ip);
-
-  if (!record || now > record.resetTime) {
-    rateLimitStore.set(ip, { count: 1, resetTime: now + RATE_LIMIT_WINDOW });
-    return { allowed: true };
-  }
-
-  if (record.count >= RATE_LIMIT_MAX) {
-    return { allowed: false, error: "Too many submissions. Please try again later." };
-  }
-
-  record.count++;
-  return { allowed: true };
-}
-
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
-    return new Response(null, {
-      status: 200,
-      headers: corsHeaders,
-    });
+    return new Response(null, { status: 200, headers: corsHeaders });
   }
 
   try {
-    // Rate limiting check
-    const clientIp = req.headers.get("x-forwarded-for") || req.headers.get("x-real-ip") || "unknown";
-    const rateLimitCheck = checkRateLimit(clientIp);
-
-    if (!rateLimitCheck.allowed) {
-      return new Response(
-        JSON.stringify({
-          success: false,
-          error: rateLimitCheck.error,
-        }),
-        {
-          headers: {
-            ...corsHeaders,
-            "Content-Type": "application/json",
-          },
-          status: 429,
-        }
-      );
-    }
-
     const resendApiKey = Deno.env.get("RESEND_API_KEY");
     const contactData: ContactData = await req.json();
 
-    // Validate and sanitize input
     const validation = validateContactData(contactData);
     if (!validation.valid) {
       return new Response(
-        JSON.stringify({
-          success: false,
-          error: validation.error,
-        }),
+        JSON.stringify({ success: false, error: validation.error }),
         {
-          headers: {
-            ...corsHeaders,
-            "Content-Type": "application/json",
-          },
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
           status: 400,
         }
       );
     }
 
-    if (!resendApiKey) {
-      console.log("RESEND_API_KEY not configured - email notification skipped");
+    // Save contact to database
+    const supabase = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+    );
+
+    const { error: dbError } = await supabase.from("contacts").insert({
+      first_name: contactData.first_name,
+      last_name: contactData.last_name,
+      email: contactData.email,
+      phone: contactData.phone || null,
+      interests: contactData.interests,
+      message: contactData.message || null,
+      status: "new",
+    });
+
+    if (dbError) {
+      console.error("Database insert error:", dbError);
       return new Response(
         JSON.stringify({
-          success: true,
-          emailSent: false,
-          message: "Form submitted successfully. Email notifications not configured.",
+          success: false,
+          error: "Failed to save your request. Please try again.",
         }),
         {
-          headers: {
-            ...corsHeaders,
-            "Content-Type": "application/json",
-          },
-          status: 200,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 500,
         }
       );
     }
 
-    const htmlContent = generateHTMLEmail(contactData);
-    const textContent = generatePlainTextEmail(contactData);
+    // Send email notification
+    let emailSent = false;
+    if (resendApiKey) {
+      const htmlContent = generateHTMLEmail(contactData);
+      const textContent = generatePlainTextEmail(contactData);
 
-    const emailPayload = {
-      from: "Paving The Way <noreply@helixitcs.com>",
-      to: ["support@pavingthewayfd.org"],
-      subject: `New Support Services Request from ${contactData.first_name} ${contactData.last_name}`,
-      html: htmlContent,
-      text: textContent,
-      reply_to: contactData.email,
-    };
+      const emailPayload = {
+        from: "Paving The Way <onboarding@resend.dev>",
+        to: ["support@pavingthewayfd.org"],
+        subject: `New Support Services Request from ${contactData.first_name} ${contactData.last_name}`,
+        html: htmlContent,
+        text: textContent,
+        reply_to: contactData.email,
+      };
 
-    const resendResponse = await fetch("https://api.resend.com/emails", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${resendApiKey}`,
-      },
-      body: JSON.stringify(emailPayload),
-    });
+      const resendResponse = await fetch("https://api.resend.com/emails", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${resendApiKey}`,
+        },
+        body: JSON.stringify(emailPayload),
+      });
 
-    if (!resendResponse.ok) {
-      const errorData = await resendResponse.text();
-      console.error("Resend API error:", errorData);
-      throw new Error(`Failed to send email: ${resendResponse.status} - ${errorData}`);
+      if (!resendResponse.ok) {
+        const errorData = await resendResponse.text();
+        console.error("Resend API error:", errorData);
+      } else {
+        emailSent = true;
+      }
     }
 
-    const result = await resendResponse.json();
-
     return new Response(
-      JSON.stringify({
-        success: true,
-        emailSent: true,
-        messageId: result.id,
-      }),
+      JSON.stringify({ success: true, emailSent }),
       {
-        headers: {
-          ...corsHeaders,
-          "Content-Type": "application/json",
-        },
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 200,
       }
     );
   } catch (error) {
-    console.error("Error sending email:", error);
+    console.error("Error processing request:", error);
 
     return new Response(
       JSON.stringify({
         success: false,
-        error: error instanceof Error ? error.message : "Unknown error occurred",
+        error: "Something went wrong. Please try again.",
       }),
       {
-        headers: {
-          ...corsHeaders,
-          "Content-Type": "application/json",
-        },
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 500,
       }
     );
